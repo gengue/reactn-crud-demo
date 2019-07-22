@@ -1,5 +1,5 @@
 /**
- * fetchList
+ * fetchOne
  * @param {object} dispatchers - all dispatcher functions
  * @param {string} resource - resource name
  * @returns {Function} - return a promise

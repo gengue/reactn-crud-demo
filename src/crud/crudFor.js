@@ -1,6 +1,6 @@
 import { DEFAULT_CONFIG } from './constants';
 import reducersFor from './reducersFor';
-import { fetchList, fetchOne } from './asyncActions';
+import { fetchList, fetchOne, create } from './asyncActions';
 
 /**
  * crudFor
@@ -17,6 +17,7 @@ export function crudFor(resource, config = DEFAULT_CONFIG) {
   return {
     fetchList: fetchList(dispatchers, resource),
     fetchOne: fetchOne(dispatchers, resource),
+    create: create(dispatchers, resource),
   };
 }
 

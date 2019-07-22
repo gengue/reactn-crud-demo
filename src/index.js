@@ -8,17 +8,7 @@ import * as serviceWorker from './serviceWorker';
 addReactNDevTools();
 
 setGlobal({
-  cards: [
-    {
-      id: 1,
-      name: 'Robert Smith',
-    },
-    {
-      id: 2,
-      name: 'Catalina Robinson',
-    },
-  ],
-  showLogo: true,
+  ui: {},
 });
 
 ReactDOM.render(<App />, document.getElementById('root'));
