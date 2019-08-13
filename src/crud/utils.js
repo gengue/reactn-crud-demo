@@ -1,5 +1,46 @@
 import isArray from 'lodash/isArray';
 import has from 'lodash/has';
+import { APP_KEY } from './constants';
+
+/**
+ * loadingState
+ * @desc used to mutate the state for loading and saving
+ * @param {Object} global
+ * @param {String} loadingKey
+ * @returns {Object}
+ */
+export function loadingState(global, loadingKey) {
+  return {
+    [APP_KEY]: {
+      ...global[APP_KEY],
+      [loadingKey]: true,
+    },
+  };
+}
+
+/**
+ * errorState
+ * @desc used to mutate the state for errors
+ * @param {Object} global
+ * @param {String} resource
+ * @param {Any} error
+ * @param {String} loadingKey
+ * @returns {Object}
+ */
+export function errorState(global, resource, error, loadingKey) {
+  return {
+    [APP_KEY]: {
+      ...global[APP_KEY],
+      [loadingKey]: false,
+      resources: {
+        [resource]: {
+          ...global[APP_KEY].resources[resource],
+          error: error,
+        },
+      },
+    },
+  };
+}
 
 /**
  * capitalCase

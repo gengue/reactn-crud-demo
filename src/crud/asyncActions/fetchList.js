@@ -9,7 +9,7 @@ function fetchList(dispatchers, resource) {
     dispatchers.fetchStart();
     // send the request
     // e.g. /users?page=1&limit=20
-    const url = `https://reqres.in/api/${resource}`;
+    const url = `https://reqres.in/api/${resource}?delay=1`;
     // TODO: 1. use our custom fetch to attach token
     // TODO: 2. use our dataProvider to fetch this
     const promise = fetch(url, {
@@ -24,10 +24,9 @@ function fetchList(dispatchers, resource) {
       .then(response => response.json())
       .then(
         function(response) {
-          console.log(response);
           const users = response.data;
           dispatchers.fetchSuccess(
-            { payload: users },
+            { payload: users, single: false },
             { replace: replaceExisting }
           );
         },

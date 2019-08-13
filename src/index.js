@@ -1,4 +1,4 @@
-import React, { setGlobal } from 'reactn';
+import React from 'react';
 import addReactNDevTools from 'reactn-devtools';
 import ReactDOM from 'react-dom';
 import './index.css';
@@ -6,10 +6,6 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 
 addReactNDevTools();
-
-setGlobal({
-  ui: {},
-});
 
 ReactDOM.render(<App />, document.getElementById('root'));
 

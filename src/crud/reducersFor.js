@@ -1,6 +1,10 @@
 import { PREFIX } from './constants';
-import fetchReducers from './reducers/list/fetch';
-import createReducers from './reducers/list/create';
+//import fetchReducersList from './reducers/list/fetch';
+//import createReducersList from './reducers/list/create';
+//import updateReducersList from './reducers/list/update';
+import fetchReducers from './reducers/map/fetch';
+import createReducers from './reducers/map/create';
+import updateReducers from './reducers/map/update';
 
 /**
  * reducersFor
@@ -10,12 +14,24 @@ import createReducers from './reducers/list/create';
  */
 export function reducersFor(resource, config) {
   const NAMESPACE = PREFIX + resource.toUpperCase();
-  // TODO: get reducers from list or map based on config
+
+  //let fetchReducers = fetchReducersMap;
+  //let createReducers = createReducersMap;
+  //let updateReducers = updateReducersMap;
+
+  //if (config.type === 'list') {
+  //fetchReducers = fetchReducersList;
+  //createReducers = createReducersList;
+  //updateReducers = updateReducersList;
+  //}
+
   const fetchDispachers = fetchReducers(NAMESPACE, resource, config);
   const createDispachers = createReducers(NAMESPACE, resource, config);
+  const updateDispachers = updateReducers(NAMESPACE, resource, config);
   return {
     ...fetchDispachers,
     ...createDispachers,
+    ...updateDispachers,
   };
 }
 

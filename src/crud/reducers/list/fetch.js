@@ -1,5 +1,5 @@
 import { addReducer, getDispatch } from 'reactn';
-import { BUSY } from './../../constants';
+import { LOADING } from './../../constants';
 import { wrapArray, assertAllHaveKeys } from './../../utils';
 
 function fetchReducers(prefix, resource, config) {
@@ -7,7 +7,7 @@ function fetchReducers(prefix, resource, config) {
     return {
       [resource]: {
         ...global[resource],
-        [BUSY]: true,
+        [LOADING]: true,
       },
     };
   });
@@ -20,7 +20,7 @@ function fetchReducers(prefix, resource, config) {
     return {
       [resource]: {
         ...global[resource],
-        [BUSY]: false,
+        [LOADING]: false,
         data: action.data,
         records,
       },
@@ -31,7 +31,7 @@ function fetchReducers(prefix, resource, config) {
     return {
       [resource]: {
         ...global[resource],
-        [BUSY]: false,
+        [LOADING]: false,
         data: action.data,
         error: action.error,
       },

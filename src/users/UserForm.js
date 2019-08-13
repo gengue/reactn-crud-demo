@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useGlobal } from 'reactn';
+import { withGlobal } from 'reactn';
 import { Link, withRouter } from 'react-router-dom';
 import { Box, Button, TextInput } from 'grommet/components';
 import Users from './data';
 
-function UserForm({ match, history }) {
-  const [users] = useGlobal('users');
+function UserForm({ users, match, history }) {
   const [form, setForm] = useState({
     email: '',
     first_name: '',
@@ -16,10 +15,7 @@ function UserForm({ match, history }) {
   const isEdit = userId !== undefined;
 
   // find user
-  const user =
-    userId && users && users.records
-      ? users.records.find(u => u.id.toString() === userId)
-      : null;
+  const user = isEdit ? users.data[userId] : null;
 
   useEffect(
     () => {
@@ -36,13 +32,18 @@ function UserForm({ match, history }) {
   const handleChange = e => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
-  const handleSubmit = async e => {
+  const handleSubmit = e => {
     e.preventDefault();
     try {
-      const res = await Users.create(form);
-      if (res.ok) {
-        history.push(`/`);
+      if (isEdit) {
+        Users.update(userId, form);
+      } else {
+        Users.create(form);
       }
+      //history.push(`/`);
+      //setTimeout(() => {
+      //history.push(`/`);
+      //}, 3000);
     } catch (e) {
       console.log('hubo un jodido error');
       console.log(e);
@@ -105,4 +106,8 @@ function UserForm({ match, history }) {
   );
 }
 
-export default withRouter(UserForm);
+const mapStateToProps = global => ({
+  users: global.vadmin.resources.users,
+});
+
+export default withGlobal(mapStateToProps)(withRouter(UserForm));

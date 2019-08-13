@@ -12,13 +12,18 @@ function create(dispatchers, resource) {
     const url = `https://reqres.in/api/${resource}`;
     // TODO: 1. use our custom fetch to attach token
     // TODO: 2. use our dataProvider to fetch this
-    const promise = fetch(url, { method: 'POST', data: formData });
+    const promise = fetch(url, {
+      method: 'POST',
+      body: JSON.stringify(formData),
+      headers: new Headers({
+        'Content-type': 'application/json',
+      }),
+    });
 
     promise
       .then(response => response.json())
       .then(
         function(response) {
-          console.log(response);
           const newUser = { ...response, ...formData };
           dispatchers.createSuccess({ payload: newUser });
         },

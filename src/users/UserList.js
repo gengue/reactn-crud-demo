@@ -1,15 +1,23 @@
-import React, { Fragment, useEffect } from 'react';
-import { useGlobal } from 'reactn';
+import React, { Fragment, useEffect, useMemo } from 'react';
+import { withGlobal } from 'reactn';
 import { Link } from 'react-router-dom';
 import { Box, Button, DataTable } from 'grommet/components';
 import Users from './data';
 
 function UserList(props) {
-  const [users] = useGlobal('users');
+  const { users, loading } = props;
 
   useEffect(() => {
     Users.fetchList();
   }, []);
+
+  const dataset = useMemo(
+    () => {
+      if (!users) return [];
+      return users.list.ids.map(i => users.data[i]);
+    },
+    [users]
+  );
 
   return (
     <Fragment>
@@ -30,6 +38,7 @@ function UserList(props) {
         pad="medium"
         margin="medium"
       >
+        {loading && <h3>Loading...</h3>}
         <DataTable
           columns={[
             {
@@ -70,11 +79,17 @@ function UserList(props) {
               },
             },
           ]}
-          data={users ? users.records : []}
+          data={dataset}
         />
       </Box>
     </Fragment>
   );
 }
 
-export default UserList;
+const mapStateToProps = global => ({
+  users: global.vadmin.resources.users,
+  loading:
+    !global.vadmin.resources.users.list.loadedOnce && global.vadmin.loading,
+});
+
+export default withGlobal(mapStateToProps)(UserList);

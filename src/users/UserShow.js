@@ -1,16 +1,12 @@
 import React, { Fragment, useEffect } from 'react';
-import { useGlobal } from 'reactn';
+import { withGlobal } from 'reactn';
 import { Link, withRouter } from 'react-router-dom';
 import { Box, Button, Text } from 'grommet/components';
 import Users from './data';
 
-function UserShow({ match }) {
-  const [users] = useGlobal('users');
+function UserShow({ users, match }) {
   const { userId } = match.params;
-  const user =
-    users && users.records
-      ? users.records.find(u => u.id.toString() === userId)
-      : null;
+  const user = users.data[userId];
 
   useEffect(
     () => {
@@ -67,4 +63,8 @@ function UserShow({ match }) {
   );
 }
 
-export default withRouter(UserShow);
+const mapStateToProps = global => ({
+  users: global.vadmin.resources.users,
+});
+
+export default withGlobal(mapStateToProps)(withRouter(UserShow));

@@ -1,12 +1,12 @@
 import { addReducer, getDispatch } from 'reactn';
-import { BUSY } from './../../constants';
+import { LOADING } from './../../constants';
 
 function createReducers(prefix, resource, config) {
   addReducer(`${prefix}_CREATE_START`, (global, dispatch, action) => {
     return {
       [resource]: {
         ...global[resource],
-        [BUSY]: true,
+        [LOADING]: true,
       },
     };
   });
@@ -20,7 +20,7 @@ function createReducers(prefix, resource, config) {
     return {
       [resource]: {
         ...global[resource],
-        [BUSY]: false,
+        [LOADING]: false,
         data: action.data,
         records,
       },
@@ -31,8 +31,7 @@ function createReducers(prefix, resource, config) {
     return {
       [resource]: {
         ...global[resource],
-        [BUSY]: false,
-        data: action.data,
+        [LOADING]: false,
         error: action.error,
       },
     };
