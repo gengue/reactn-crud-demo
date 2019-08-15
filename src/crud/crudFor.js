@@ -1,7 +1,7 @@
 import { getGlobal, setGlobal } from 'reactn';
 import { DEFAULT_CONFIG, APP_KEY, getDefaultResourceState } from './constants';
 import reducersFor from './reducersFor';
-import { fetchList, fetchOne, create, update } from './asyncActions';
+import { fetchList, fetchOne, create, update, remove } from './asyncActions';
 
 /**
  * crudFor
@@ -12,8 +12,9 @@ import { fetchList, fetchOne, create, update } from './asyncActions';
  * @param {object} config - options to setup the reducers
  * @returns {object} - object of functions (action creators)
  */
-export function crudFor(resource, config = DEFAULT_CONFIG) {
-  const dispatchers = reducersFor(resource, config);
+export function crudFor(resource, config = {}) {
+  const finalConfig = { ...DEFAULT_CONFIG, ...config };
+  const dispatchers = reducersFor(resource, finalConfig);
   const admin = getGlobal()[APP_KEY];
 
   // initialize admin schema
@@ -21,7 +22,7 @@ export function crudFor(resource, config = DEFAULT_CONFIG) {
     setGlobal({
       [APP_KEY]: {
         resources: {
-          ...getDefaultResourceState(resource, config.props),
+          ...getDefaultResourceState(resource, finalConfig.props),
         },
         loading: false,
         saving: false,
@@ -36,7 +37,7 @@ export function crudFor(resource, config = DEFAULT_CONFIG) {
           ...admin,
           resources: {
             ...admin.resources,
-            ...getDefaultResourceState(resource, config.props),
+            ...getDefaultResourceState(resource, finalConfig.props),
           },
         },
       });
@@ -50,6 +51,9 @@ export function crudFor(resource, config = DEFAULT_CONFIG) {
     fetchOne: fetchOne(dispatchers, resource),
     create: create(dispatchers, resource),
     update: update(dispatchers, resource),
+    delete: remove(dispatchers, resource),
+    filter: (params, meta = {}) =>
+      dispatchers.filterList({ payload: params }, meta),
   };
 }
 

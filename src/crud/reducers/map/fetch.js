@@ -13,7 +13,7 @@ function fetchReducers(prefix, resource, config) {
     errorState(global, resource, action.error, LOADING_KEY)
   );
 
-  addReducer(`${prefix}_FETCH_SUCCESS`, (global, dispatch, action) => {
+  addReducer(`${prefix}_FETCH_SUCCESS`, (global, dispatch, action, meta) => {
     const ids = [];
     let newData = {};
 
@@ -28,7 +28,6 @@ function fetchReducers(prefix, resource, config) {
         return { ...acc, [i[key]]: i };
       }, {});
     }
-
     const admin = { ...global[APP_KEY] };
     const { resources } = admin;
 
@@ -40,12 +39,15 @@ function fetchReducers(prefix, resource, config) {
           ...resources,
           [resource]: {
             ...resources[resource],
-            data: { ...resources[resource].data, ...newData },
+            data: meta.replace
+              ? newData
+              : { ...resources[resource].data, ...newData },
             list: {
               ...resources[resource].list,
+              //params: { ...resources[resource].list, ...action.params },
               ids,
               loadedOnce: true,
-              total: ids.length,
+              total: action.total,
             },
           },
         },

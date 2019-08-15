@@ -35,7 +35,7 @@ export function errorState(global, resource, error, loadingKey) {
       resources: {
         [resource]: {
           ...global[APP_KEY].resources[resource],
-          error: error,
+          error: error.toString(),
         },
       },
     },

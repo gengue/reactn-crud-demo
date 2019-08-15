@@ -2,19 +2,18 @@ import React, { Fragment, useEffect } from 'react';
 import { withGlobal } from 'reactn';
 import { Link, withRouter } from 'react-router-dom';
 import { Box, Button, Text } from 'grommet/components';
-import Users from './data';
 
-function UserShow({ users, match }) {
-  const { userId } = match.params;
-  const user = users.data[userId];
+function UserShow({ users, match, crudHanlder }) {
+  const { resourceId } = match.params;
+  const user = users.data[resourceId];
 
   useEffect(
     () => {
       if (!user) {
-        Users.fetchOne(userId);
+        crudHanlder.fetchOne(resourceId);
       }
     },
-    [userId, user]
+    [resourceId, user, crudHanlder]
   );
 
   if (!user) return null;
@@ -31,7 +30,7 @@ function UserShow({ users, match }) {
         <Link to="/">
           <Button label="Back" />
         </Link>
-        <Link to={`/users/${userId}/edit`}>
+        <Link to={`/users/${resourceId}/edit`}>
           <Button label="Edit" />
         </Link>
       </Box>

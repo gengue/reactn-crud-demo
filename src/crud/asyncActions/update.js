@@ -1,15 +1,17 @@
+import { APP_KEY } from './../constants';
+
 /**
  * update
  * @param {object} dispatchers - all dispatcher functions
  * @param {string} resource - resource name
  * @returns {Function} - return a promise
  */
-function create(dispatchers, resource) {
-  return (id, formData) => {
+function update(dispatchers, resource) {
+  return (id, formData, extra = {}, sideEffectsCb) => {
     dispatchers.updateStart();
     // send the request
     // e.g. /users?page=1&limit=20
-    const url = `https://reqres.in/api/${resource}/${id}`;
+    const url = `https://5d543b8b36ad770014ccd65a.mockapi.io/api/${resource}/${id}`;
     // TODO: 1. use our custom fetch to attach token
     // TODO: 2. use our dataProvider to fetch this
     const promise = fetch(url, {
@@ -23,14 +25,24 @@ function create(dispatchers, resource) {
     promise
       .then(response => response.json())
       .then(
-        function(response) {
-          console.log(response);
+        async function(response) {
           const newUser = { ...response, ...formData };
-          dispatchers.updateSuccess({ payload: newUser });
+          const global = await dispatchers.updateSuccess(
+            { payload: newUser },
+            extra
+          );
+          // call side effects
+          const state = global[APP_KEY].resources[resource];
+          if (sideEffectsCb)
+            sideEffectsCb({ success: true, state }, dispatchers);
         },
-        function(response) {
+        async function(error) {
           // dispatch the error action
-          dispatchers.updateError({ error: response });
+          const global = await dispatchers.updateError({ error });
+          // call side effects
+          const state = global[APP_KEY].resources[resource];
+          if (sideEffectsCb)
+            sideEffectsCb({ success: false, state, error }, dispatchers);
         }
       )
       .catch(function(err) {
@@ -41,4 +53,4 @@ function create(dispatchers, resource) {
   };
 }
 
-export default create;
+export default update;

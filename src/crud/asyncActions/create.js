@@ -5,11 +5,11 @@
  * @returns {Function} - return a promise
  */
 function create(dispatchers, resource) {
-  return formData => {
+  return (formData, meta = {}, sideEffectsCb) => {
     dispatchers.createStart();
     // send the request
     // e.g. /users?page=1&limit=20
-    const url = `https://reqres.in/api/${resource}`;
+    const url = `https://5d543b8b36ad770014ccd65a.mockapi.io/api/${resource}`;
     // TODO: 1. use our custom fetch to attach token
     // TODO: 2. use our dataProvider to fetch this
     const promise = fetch(url, {
@@ -23,13 +23,25 @@ function create(dispatchers, resource) {
     promise
       .then(response => response.json())
       .then(
-        function(response) {
+        async function(response) {
+          // dispatch the success action
           const newUser = { ...response, ...formData };
-          dispatchers.createSuccess({ payload: newUser });
+          const global = await dispatchers.createSuccess(
+            { payload: newUser },
+            meta
+          );
+          // call side effect
+          const state = global.vadmin.resources[resource];
+          if (sideEffectsCb)
+            sideEffectsCb({ success: true, state }, dispatchers);
         },
-        function(response) {
+        async function(error) {
           // dispatch the error action
-          dispatchers.createError({ error: response });
+          const global = await dispatchers.createError({ error }, meta);
+          // call side effect
+          const state = global.vadmin.resources[resource];
+          if (sideEffectsCb)
+            sideEffectsCb({ success: false, state, error }, dispatchers);
         }
       )
       .catch(function(err) {

@@ -1,3 +1,5 @@
+import queryString from 'query-string';
+
 /**
  * fetchList
  * @param {object} dispatchers - all dispatcher functions
@@ -5,30 +7,32 @@
  * @returns {Function} - return a promise
  */
 function fetchList(dispatchers, resource) {
-  return (page, limit, replaceExisting) => {
+  return (params = {}, replaceExisting) => {
     dispatchers.fetchStart();
     // send the request
     // e.g. /users?page=1&limit=20
-    const url = `https://reqres.in/api/${resource}?delay=1`;
+
+    const query = queryString.stringify({
+      page: params.page || 1,
+      limit: params.perPage || 10,
+    });
+    const url = `https://5d543b8b36ad770014ccd65a.mockapi.io/api/${resource}?${query}`;
     // TODO: 1. use our custom fetch to attach token
     // TODO: 2. use our dataProvider to fetch this
-    const promise = fetch(url, {
-      method: 'GET',
-      data: {
-        page: page || 1,
-        limit: limit || 10,
-      },
-    });
-
+    const promise = fetch(url, { method: 'GET' });
     promise
       .then(response => response.json())
       .then(
         function(response) {
           const users = response.data;
-          dispatchers.fetchSuccess(
-            { payload: users, single: false },
-            { replace: replaceExisting }
-          );
+          const action = {
+            payload: users,
+            single: false,
+            params,
+            total: response.total,
+          };
+          const meta = { replace: replaceExisting };
+          dispatchers.fetchSuccess(action, meta);
         },
         function(response) {
           // dispatch the error action

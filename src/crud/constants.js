@@ -14,6 +14,8 @@ export const DEFAULT_CONFIG = {
   key: DEFAULT_KEY,
   type: 'map',
   props: {
+    basePath: '/',
+    apiPrefix: null,
     hasList: true,
     hasEdit: true,
     hasShow: true,
@@ -34,9 +36,9 @@ export function getDefaultResourceState(resource, props) {
         loadedOnce: false,
         params: {
           sort: null,
-          order: null,
+          order: 'DESC',
           page: 1,
-          perPage: 15,
+          perPage: 10,
           filter: {},
         },
         total: 0,

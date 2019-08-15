@@ -9,7 +9,7 @@ function fetchOne(dispatchers, resource) {
     dispatchers.fetchStart();
     // send the request
     // e.g. /users?page=1&limit=20
-    const url = `https://reqres.in/api/${resource}/${id}`;
+    const url = `https://5d543b8b36ad770014ccd65a.mockapi.io/api/${resource}/${id}`;
     // TODO: 1. use our custom fetch to attach token
     // TODO: 2. use our dataProvider to fetch this
     const promise = fetch(url);
@@ -18,8 +18,8 @@ function fetchOne(dispatchers, resource) {
       .then(response => response.json())
       .then(
         function(response) {
-          const user = response.data;
-          dispatchers.fetchSuccess({ payload: user, single: true });
+          const user = response;
+          dispatchers.fetchSuccess({ payload: user, single: true }, {});
         },
         function(response) {
           // dispatch the error action
