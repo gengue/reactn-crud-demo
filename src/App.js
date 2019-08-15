@@ -29,7 +29,9 @@ function Resource({
   show: Show,
   create: Create,
   edit: Edit,
+  config,
 }) {
+  console.log(resource);
   const [crudHandler, setCrudHandler] = useState(
     crudHandlerRegistry.get(resource)
   );
@@ -37,12 +39,21 @@ function Resource({
   useEffect(
     () => {
       if (!crudHandler) {
-        const handler = crud(resource);
+        const setup = {
+          props: {
+            ...config,
+            hasList: List !== undefined,
+            hasShow: Show !== undefined,
+            hasEdit: Edit !== undefined,
+            hasCreate: Create !== undefined,
+          },
+        };
+        const handler = crud(resource, setup);
         setCrudHandler(handler);
         crudHandlerRegistry.register(resource, handler);
       }
     },
-    [resource, crudHandler]
+    [resource, crudHandler, config, List, Show, Edit, Create]
   );
 
   if (!crudHandler) return 'Loading...';
@@ -107,6 +118,12 @@ function App() {
             resource="users"
             label="Users"
             {...usersCrud}
+          />
+          <Resource
+            basePath="/"
+            resource="books"
+            label="Books"
+            list={usersCrud.list}
           />
           <Route component={() => 'No Match'} />
         </Switch>
