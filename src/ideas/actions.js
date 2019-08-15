@@ -10,7 +10,7 @@ export const CREATE = 'CRUD/CREATE';
 
 export const UPDATE = 'CRUD/UPDATE';
 
-export const DELETE = 'CRUD/UPDATE';
+export const DELETE = 'CRUD/DELETE';
 
 export const RESOURCE_REQUEST = 'CRUD/RESOURCE_REQUEST';
 
