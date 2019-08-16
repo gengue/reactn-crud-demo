@@ -1,15 +1,14 @@
 import React from 'react';
-import { withGlobal } from 'reactn';
 import { paginate } from './../utils';
 
 function Pagination(props) {
-  const { crudHandler } = props;
-  const { total } = props.list;
-  const { page, perPage } = props.list.params;
+  const { resource, crudHandler, list } = props;
+  const { total, params } = list;
+  const { page, perPage } = params;
 
-  const handleClick = page => crudHandler.filter({ page });
+  const handleClick = page => crudHandler.filter({ page }, { resource });
   const handlePerPage = e => {
-    crudHandler.filter({ perPage: parseInt(e.target.value, 10) });
+    crudHandler.filter({ perPage: parseInt(e.target.value, 10) }, { resource });
   };
 
   const pgData = paginate(total, page, perPage);
@@ -40,8 +39,4 @@ function Pagination(props) {
   );
 }
 
-export default withGlobal(global => ({
-  list: global.vadmin.resources.users.list,
-  loading:
-    !global.vadmin.resources.users.list.loadedOnce && global.vadmin.loading,
-}))(Pagination);
+export default Pagination;

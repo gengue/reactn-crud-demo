@@ -1,3 +1,32 @@
+const linkToRecord = (basePath, id, linkType = 'edit') => {
+  const link = `${basePath}/${encodeURIComponent(id)}`;
+  if (linkType === 'show') {
+    return `${link}/show`;
+  }
+  if (linkType === 'edit') {
+    return `${link}/edit`;
+  }
+  return link;
+};
+
+export const resolveRedirect = (redirectTo, basePath, id, data) => {
+  if (typeof redirectTo === 'function') {
+    return redirectTo(basePath, id, data);
+  }
+  switch (redirectTo) {
+    case 'list':
+      return basePath;
+    case 'create':
+      return `${basePath}/create`;
+    case 'edit':
+      return linkToRecord(basePath, id, 'edit');
+    case 'show':
+      return linkToRecord(basePath, id, 'show');
+    default:
+      return redirectTo;
+  }
+};
+
 export function paginate(
   totalItems,
   currentPage = 1,

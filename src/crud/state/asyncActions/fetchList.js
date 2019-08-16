@@ -25,9 +25,9 @@ function fetchList(dispatchers, resource) {
       .then(response => response.json())
       .then(
         function(response) {
-          const users = response.data;
+          const payload = response.data;
           const action = {
-            payload: users,
+            payload,
             single: false,
             params,
             total: response.total,

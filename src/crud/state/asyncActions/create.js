@@ -26,15 +26,15 @@ function create(dispatchers, resource) {
       .then(
         async function(response) {
           // dispatch the success action
-          const newUser = { ...response, ...formData };
+          const record = { ...response, ...formData };
           const global = await dispatchers.createSuccess(
-            { payload: newUser },
+            { payload: record },
             meta
           );
           // call side effect
           const state = global.vadmin.resources[resource];
           if (sideEffectsCb)
-            sideEffectsCb({ success: true, state }, dispatchers);
+            sideEffectsCb({ success: true, state, record }, dispatchers);
         },
         async function(error) {
           // dispatch the error action

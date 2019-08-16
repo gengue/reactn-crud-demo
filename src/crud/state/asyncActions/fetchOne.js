@@ -19,8 +19,8 @@ function fetchOne(dispatchers, resource) {
       .then(response => response.json())
       .then(
         function(response) {
-          const user = response;
-          dispatchers.getOneSuccess({ payload: user, single: true }, meta);
+          const record = response;
+          dispatchers.getOneSuccess({ payload: record, single: true }, meta);
         },
         function(response) {
           // dispatch the error action

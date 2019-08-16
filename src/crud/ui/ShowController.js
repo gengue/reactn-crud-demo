@@ -1,22 +1,28 @@
-import React, { Fragment, useEffect } from 'react';
+import React, { memo, Fragment, useEffect } from 'react';
+import get from 'lodash/get';
 import { withGlobal } from 'reactn';
 import { Link, withRouter } from 'react-router-dom';
 import { Box, Button, Text } from 'grommet/components';
+import { APP_KEY } from './../constants';
+import { resolveRedirect } from './utils';
 
-function ShowController({ users, match, crudHandler }) {
+function ShowController({ data, loading, fields, match, crudHandler }) {
   const { resourceId } = match.params;
-  const user = users.data[resourceId];
+  const { basePath } = data.props;
+  const record = data.data[resourceId];
 
   useEffect(
     () => {
-      if (!user) {
-        crudHandler.fetchOne(resourceId);
-      }
+      crudHandler.fetchOne(resourceId);
+      //if (!record) {
+      //crudHandler.fetchOne(resourceId);
+      //}
     },
-    [resourceId, user, crudHandler]
+    [resourceId, crudHandler]
   );
 
-  if (!user) return null;
+  if (!record && loading) return 'Loading...';
+  if (!record) return null;
 
   return (
     <Fragment>
@@ -27,10 +33,10 @@ function ShowController({ users, match, crudHandler }) {
         margin="medium"
         justify="between"
       >
-        <Link to="/books/">
+        <Link to={resolveRedirect('list', basePath)}>
           <Button label="Back" />
         </Link>
-        <Link to={`/users/${resourceId}/edit`}>
+        <Link to={resolveRedirect('edit', basePath, record.id)}>
           <Button label="Edit" />
         </Link>
       </Box>
@@ -40,30 +46,37 @@ function ShowController({ users, match, crudHandler }) {
         pad="medium"
         margin="medium"
       >
-        <img
-          src={user.avatar}
-          alt="avatar"
-          style={{ borderRadius: '50%', height: '100px', width: '100px' }}
-        />
-        <br />
-        <Text weight="bold" margin={{ right: '10px' }}>
-          Email:{' '}
-        </Text>
-        <Text>{user.email}</Text>
-        <br />
-        <Text weight="bold" margin={{ right: '10px' }}>
-          Name:{' '}
-        </Text>
-        <Text>
-          {user.first_name} {user.last_name}
-        </Text>
+        {fields.map((field, idx) => {
+          const content = field.render
+            ? field.render(record)
+            : get(record, field.property);
+          return (
+            <div key={field.property || idx}>
+              {field.label && (
+                <Text weight="bold" margin={{ right: '10px' }}>
+                  {field.label}:
+                </Text>
+              )}
+              {content}
+              <br />
+            </div>
+          );
+        })}
       </Box>
     </Fragment>
   );
 }
 
-const mapStateToProps = global => ({
-  users: global.vadmin.resources.users,
-});
+export default props => {
+  const { resource } = props;
 
-export default withGlobal(mapStateToProps)(withRouter(ShowController));
+  const mapStateToProps = global => ({
+    data: global[APP_KEY].resources[resource],
+    loading: global[APP_KEY].loading,
+  });
+
+  const Controller = withGlobal(mapStateToProps)(
+    withRouter(memo(ShowController))
+  );
+  return <Controller {...props} />;
+};

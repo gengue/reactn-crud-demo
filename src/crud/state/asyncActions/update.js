@@ -27,15 +27,15 @@ function update(dispatchers, resource) {
       .then(response => response.json())
       .then(
         async function(response) {
-          const newUser = { ...response, ...formData };
+          const record = { ...response, ...formData };
           const global = await dispatchers.updateSuccess(
-            { payload: newUser },
+            { payload: record },
             meta
           );
           // call side effects
           const state = global[APP_KEY].resources[resource];
           if (sideEffectsCb)
-            sideEffectsCb({ success: true, state }, dispatchers);
+            sideEffectsCb({ success: true, state, record }, dispatchers);
         },
         async function(error) {
           // dispatch the error action

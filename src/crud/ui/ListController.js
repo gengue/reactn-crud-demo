@@ -1,9 +1,11 @@
 import React, { Fragment, useEffect, useMemo, memo } from 'react';
+import get from 'lodash/get';
 import { withGlobal } from 'reactn';
 import { Link } from 'react-router-dom';
 import { APP_KEY } from './../constants';
 import { Box, Button, DataTable } from 'grommet/components';
 import Pagination from './components/Pagination';
+import { resolveRedirect } from './utils';
 
 const ListController = function(props) {
   const { columns, data, resource, loading, crudHandler } = props;
@@ -24,7 +26,11 @@ const ListController = function(props) {
     [data]
   );
 
-  const fields = getActionsColumns(columns, data.props, crudHandler);
+  const fields = useMemo(() => getColumns(columns, data.props, crudHandler), [
+    columns,
+    data.props,
+    crudHandler,
+  ]);
 
   return (
     <Fragment>
@@ -39,7 +45,7 @@ const ListController = function(props) {
         <Link to="/">
           <Button label="Back" />
         </Link>
-        <Link to={`${basePath}${resource}/create`}>
+        <Link to={resolveRedirect('create', basePath)}>
           <Button label="Create" />
         </Link>
       </Box>
@@ -59,14 +65,20 @@ const ListController = function(props) {
         pad="medium"
         margin="medium"
       >
-        <Pagination perPage={5} crudHandler={crudHandler} />
+        <Pagination
+          resource={resource}
+          perPage={5}
+          crudHandler={crudHandler}
+          list={data.list}
+          loading={loading}
+        />
       </Box>
     </Fragment>
   );
 };
 
-const getActionsColumns = (columns, config, crudHandler) => {
-  const { basePath, name: resource, hasEdit, hasDelete } = config;
+function getColumns(columns, config, crudHandler) {
+  const { basePath, hasEdit, hasDelete } = config;
 
   function deleteSideEffect({ success, error }) {
     if (success) {
@@ -79,7 +91,19 @@ const getActionsColumns = (columns, config, crudHandler) => {
   const handleDelete = id => crudHandler.delete(id, deleteSideEffect);
 
   return [
-    ...columns,
+    ...columns.map((field, idx) => {
+      const customRender = field.render;
+      // wrap into a Link
+      if (field.primary) {
+        field.render = record => (
+          <Link to={resolveRedirect('show', basePath, record.id)}>
+            {customRender ? customRender(record) : get(record, field.property)}
+          </Link>
+        );
+      }
+      // return original definition
+      return field;
+    }),
     {
       property: '',
       header: '',
@@ -87,7 +111,9 @@ const getActionsColumns = (columns, config, crudHandler) => {
         return (
           <Fragment>
             {hasEdit && (
-              <Link to={`${basePath}${resource}/${record.id}/edit`}>Edit</Link>
+              <Link to={resolveRedirect('edit', basePath, record.id, record)}>
+                Edit
+              </Link>
             )}
             {hasDelete && (
               <button onClick={() => handleDelete(record.id)}>Delete</button>
@@ -97,7 +123,7 @@ const getActionsColumns = (columns, config, crudHandler) => {
       },
     },
   ];
-};
+}
 
 export default props => {
   const { resource } = props;

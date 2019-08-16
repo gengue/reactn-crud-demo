@@ -16,7 +16,7 @@ export function routesFor(resource, actions, config) {
       <Route
         key={`${resource}-crud-list`}
         exact
-        path={`${basePath}${resource}`}
+        path={`${basePath}`}
         component={props => <List {...props} crudHandler={actions} />}
       />
     ),
@@ -24,7 +24,7 @@ export function routesFor(resource, actions, config) {
       <Route
         key={`${resource}-crud-show`}
         exact
-        path={`${basePath}${resource}/:resourceId/show`}
+        path={`${basePath}/:resourceId/show`}
         component={props => <Show {...props} crudHandler={actions} />}
       />
     ),
@@ -32,7 +32,7 @@ export function routesFor(resource, actions, config) {
       <Route
         key={`${resource}-crud-edit`}
         exact
-        path={`${basePath}${resource}/:resourceId/edit`}
+        path={`${basePath}/:resourceId/edit`}
         component={props => <Edit {...props} crudHandler={actions} />}
       />
     ),
@@ -40,7 +40,7 @@ export function routesFor(resource, actions, config) {
       <Route
         key={`${resource}-crud-create`}
         exact
-        path={`${basePath}${resource}/create`}
+        path={`${basePath}/create`}
         component={props => <Create {...props} crudHandler={actions} />}
       />
     ),

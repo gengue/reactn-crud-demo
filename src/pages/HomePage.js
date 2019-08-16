@@ -11,7 +11,7 @@ function HomePage(props) {
       <ul>
         {Object.keys(resources).map(i => (
           <li key={i}>
-            <Link to={`${resources[i].props.basePath}${i}`}>{i}</Link>
+            <Link to={`${resources[i].props.basePath}`}>{i}</Link>
           </li>
         ))}
       </ul>

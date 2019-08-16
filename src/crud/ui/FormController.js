@@ -3,34 +3,7 @@ import { withGlobal } from 'reactn';
 import { Link, withRouter } from 'react-router-dom';
 import { APP_KEY } from './../constants';
 import { Box, Button } from 'grommet/components';
-
-const linkToRecord = (basePath, id, linkType = 'edit') => {
-  const link = `${basePath}/${encodeURIComponent(id)}`;
-
-  if (linkType === 'show') {
-    return `${link}/show`;
-  }
-
-  return link;
-};
-
-const resolveRedirect = (redirectTo, basePath, id, data) => {
-  if (typeof redirectTo === 'function') {
-    return redirectTo(basePath, id, data);
-  }
-  switch (redirectTo) {
-    case 'list':
-      return basePath;
-    case 'create':
-      return `${basePath}/create`;
-    case 'edit':
-      return linkToRecord(basePath, id);
-    case 'show':
-      return `${linkToRecord(basePath, id)}/show`;
-    default:
-      return redirectTo;
-  }
-};
+import { resolveRedirect } from './utils';
 
 function FormController({
   data,
@@ -39,14 +12,10 @@ function FormController({
   history,
   crudHandler,
   children,
+  redirectTo,
 }) {
   const { basePath } = data.props;
-  const [form, setForm] = useState({
-    email: '',
-    first_name: '',
-    last_name: '',
-    avatar: '',
-  });
+  const [form, setForm] = useState({});
   const { resourceId } = match.params;
   const isEdit = resourceId !== undefined;
 
@@ -66,18 +35,19 @@ function FormController({
   );
 
   const handleChange = e => {
-    console.log('sisas niño', e.target.value);
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const submitSideEffect = type => ({ success, error }) => {
+  const submitSideEffect = type => ({ success, record, error }) => {
     if (type === 'create' && success) {
       console.log('Sisas, creado todo bien');
-      history.push(`${basePath}${resource}`);
+      const url = resolveRedirect(redirectTo, basePath, record.id, record);
+      history.push(url);
     }
     if (type === 'edit' && success) {
       console.log('Sisas, editado todo bien');
-      history.push(`${basePath}${resource}`);
+      const url = resolveRedirect(redirectTo, basePath, record.id, record);
+      history.push(url);
     }
     if (!success) {
       console.log('Ocurrio cule error hp', error);
@@ -107,7 +77,7 @@ function FormController({
         margin="medium"
         justify="between"
       >
-        <Link to={`${basePath}${resource}`}>
+        <Link to={resolveRedirect('list', basePath)}>
           <Button label="Back" />
         </Link>
         <Button label="Save" type="submit" />
@@ -123,7 +93,7 @@ function FormController({
             <child.type
               {...child.props}
               onChange={handleChange}
-              value={form[child.props.name]}
+              value={form[child.props.name] || ''}
             />
           ))}
           <Button label="Save" type="submit" />
@@ -132,6 +102,10 @@ function FormController({
     </form>
   );
 }
+
+FormController.defaultProps = {
+  redirectTo: 'list',
+};
 
 export default props => {
   const { resource } = props;
