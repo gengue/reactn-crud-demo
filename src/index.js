@@ -1,9 +1,15 @@
 import React from 'react';
 import addReactNDevTools from 'reactn-devtools';
 import ReactDOM from 'react-dom';
-import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
+import dataProvider from './ideas/dataProvider';
+import { settings as crudSettings } from './crud';
+import './index.css';
+import 'rsuite/dist/styles/rsuite.min.css';
+
+// set data provider
+crudSettings.set({ dataProvider });
 
 addReactNDevTools();
 

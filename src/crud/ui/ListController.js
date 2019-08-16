@@ -1,15 +1,41 @@
-import React, { Fragment, useEffect, useMemo, memo } from 'react';
+import React, { Fragment, useEffect, useState, useMemo, memo } from 'react';
 import get from 'lodash/get';
 import { withGlobal } from 'reactn';
 import { Link } from 'react-router-dom';
 import { APP_KEY } from './../constants';
-import { Box, Button, DataTable } from 'grommet/components';
 import Pagination from './components/Pagination';
 import { resolveRedirect } from './utils';
+import {
+  IconButton,
+  Table,
+  Grid,
+  Row,
+  Button,
+  Icon,
+  Header,
+  Content,
+} from 'rsuite';
+
+const { Column, HeaderCell, Cell } = Table;
+
+const defaultListProps = {
+  wordWrap: true,
+  autoHeight: true,
+};
 
 const ListController = function(props) {
-  const { columns, data, resource, loading, crudHandler } = props;
+  const {
+    columns,
+    data,
+    resource,
+    loading,
+    fetching,
+    crudHandler,
+    listProps,
+  } = props;
   const { basePath } = data.props;
+
+  const [sort, setSort] = useState({});
 
   useEffect(
     () => {
@@ -32,47 +58,66 @@ const ListController = function(props) {
     crudHandler,
   ]);
 
+  const tableProps = useMemo(
+    () => ({
+      ...defaultListProps,
+      ...listProps,
+    }),
+    [listProps]
+  );
+
+  const handleSortColumn = (sortColumn, sortType) => {
+    setSort({ sortColumn, sortType });
+    console.log('handleSortColumn', sortColumn, sortType);
+  };
+
   return (
     <Fragment>
-      <Box
-        direction="row"
-        border={{ color: 'brand', size: 'small', style: 'dashed' }}
-        pad="medium"
-        margin="medium"
-        justify="between"
-        wrap
-      >
-        <Link to="/">
-          <Button label="Back" />
-        </Link>
-        <Link to={resolveRedirect('create', basePath)}>
-          <Button label="Create" />
-        </Link>
-      </Box>
-
-      <div>{loading && <h3>Loading...</h3>}</div>
-      <Box
-        direction="row"
-        border={{ color: 'brand', size: 'medium', style: 'dashed' }}
-        pad="medium"
-        margin="medium"
-      >
-        <DataTable columns={fields} data={dataset} />
-      </Box>
-      <Box
-        direction="row"
-        border={{ color: 'brand', size: 'small', style: 'dashed' }}
-        pad="medium"
-        margin="medium"
-      >
-        <Pagination
-          resource={resource}
-          perPage={5}
-          crudHandler={crudHandler}
-          list={data.list}
-          loading={loading}
-        />
-      </Box>
+      <Header>
+        <h2>List Controller</h2>
+      </Header>
+      <Content>
+        <Grid fluid>
+          <Row style={{ textAlign: 'right' }}>
+            <Link to={resolveRedirect('create', basePath)}>
+              <Button appearance="primary">Create</Button>
+            </Link>
+          </Row>
+          <Row>
+            <Table
+              data={dataset}
+              loading={loading || fetching}
+              sortColumn={sort.sortColumn}
+              sortType={sort.sortType}
+              onSortColumn={handleSortColumn}
+              {...tableProps}
+            >
+              {fields.map((field, idx) => {
+                const uiProps = get(field, 'uiProps', {});
+                return (
+                  <Column {...uiProps} key={field.property || idx}>
+                    <HeaderCell>{field.header}</HeaderCell>
+                    {field.render ? (
+                      <Cell dataKey={field.property}>
+                        {rowData => field.render(rowData)}
+                      </Cell>
+                    ) : (
+                      <Cell dataKey={field.property} />
+                    )}
+                  </Column>
+                );
+              })}
+            </Table>
+            <Pagination
+              resource={resource}
+              perPage={5}
+              crudHandler={crudHandler}
+              list={data.list}
+              loading={loading}
+            />
+          </Row>
+        </Grid>
+      </Content>
     </Fragment>
   );
 };
@@ -112,24 +157,45 @@ function getColumns(columns, config, crudHandler) {
           <Fragment>
             {hasEdit && (
               <Link to={resolveRedirect('edit', basePath, record.id, record)}>
-                Edit
+                <IconButton
+                  color="cyan"
+                  size="sm"
+                  icon={<Icon icon="edit2" />}
+                />
               </Link>
             )}
             {hasDelete && (
-              <button onClick={() => handleDelete(record.id)}>Delete</button>
+              <IconButton
+                style={{ marginLeft: '5px' }}
+                color="red"
+                size="sm"
+                icon={<Icon icon="trash2" />}
+                onClick={() => handleDelete(record.id)}
+              />
             )}
           </Fragment>
         );
       },
+      uiProps: {
+        flexGrow: 1,
+        verticalAlign: 'middle',
+        align: 'right',
+        fixed: 'right',
+      },
     },
   ];
 }
+
+ListController.defaultProps = {
+  listProps: defaultListProps,
+};
 
 export default props => {
   const { resource } = props;
 
   const mapStateToProps = global => ({
     data: global[APP_KEY].resources[resource],
+    fetching: global[APP_KEY].loading,
     loading:
       !global[APP_KEY].resources[resource].list.loadedOnce &&
       global[APP_KEY].loading,

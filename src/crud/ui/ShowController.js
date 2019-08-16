@@ -2,7 +2,8 @@ import React, { memo, Fragment, useEffect } from 'react';
 import get from 'lodash/get';
 import { withGlobal } from 'reactn';
 import { Link, withRouter } from 'react-router-dom';
-import { Box, Button, Text } from 'grommet/components';
+import { Box, Text } from 'grommet/components';
+import { Button } from 'rsuite';
 import { APP_KEY } from './../constants';
 import { resolveRedirect } from './utils';
 
@@ -34,10 +35,10 @@ function ShowController({ data, loading, fields, match, crudHandler }) {
         justify="between"
       >
         <Link to={resolveRedirect('list', basePath)}>
-          <Button label="Back" />
+          <Button appearance="ghost">Back</Button>
         </Link>
         <Link to={resolveRedirect('edit', basePath, record.id)}>
-          <Button label="Edit" />
+          <Button appearance="primary">Edit</Button>
         </Link>
       </Box>
       <Box

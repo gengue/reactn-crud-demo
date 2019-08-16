@@ -5,16 +5,9 @@
  */
 
 import { stringify } from 'query-string';
-import fetchJson from 'utils/fetchJson';
-import {
-  GET_LIST,
-  GET_ONE,
-  GET_MANY,
-  GET_MANY_REFERENCE,
-  CREATE,
-  UPDATE,
-  DELETE,
-} from 'state/crud/actions';
+import fetchJson from './fetchJson';
+import { constants } from './../crud';
+const { GET_LIST, GET_ONE, CREATE, UPDATE, DELETE } = constants;
 
 const parseQuery = v => stringify(v, { arrayFormat: 'bracket' });
 
@@ -28,7 +21,8 @@ const parseQuery = v => stringify(v, { arrayFormat: 'bracket' });
 export const apiUrlMapping = (resource, withReplaceValue = null) => {
   //const userId = JSON.parse(localStorage.getItem('user')).id;
   const urlMap = {
-    users: 'users/v1/users',
+    //users: 'users/v1/users',
+    users: 'users',
     'users-cached': 'users/v1/users-cached',
     'quarterly-reviews': 'users/v1/quarter_reviews',
     permissions: 'users/v1/me/perms',
@@ -68,10 +62,6 @@ export const epilogueClient = (apiUrl, httpClient) => {
     const sortValue = ({ field, order }) => {
       return order === 'DESC' ? `-${field}` : field;
     };
-    if (type === GET_MANY) {
-      params.filter = params.filter || {};
-      params.filter.ids = params.ids;
-    }
     switch (type) {
       case GET_LIST: {
         const { page, perPage } = params.pagination;
@@ -91,29 +81,6 @@ export const epilogueClient = (apiUrl, httpClient) => {
       case GET_ONE:
         url = `${apiUrl}/${apiUrlMapping(resource)}/${params.id}`;
         break;
-      case GET_MANY: {
-        const query = {
-          id: params.ids,
-        };
-        if (resource === 'users') {
-          // use cached users endpoint for LIST action
-          resource = 'users-cached';
-        }
-        url = `${apiUrl}/${apiUrlMapping(resource)}?${parseQuery(query)}`;
-        break;
-      }
-      case GET_MANY_REFERENCE: {
-        const { page, perPage } = params.pagination;
-        const query = {
-          ...params.filter,
-          [params.target]: params.id,
-          sort: sortValue(params.sort),
-          page: page - 1,
-          count: perPage,
-        };
-        url = `${apiUrl}/${apiUrlMapping(resource)}?${parseQuery(query)}`;
-        break;
-      }
       case UPDATE:
         url = `${apiUrl}/${apiUrlMapping(resource)}/${params.id}`;
         options.method = 'PUT';
@@ -145,8 +112,6 @@ export const epilogueClient = (apiUrl, httpClient) => {
     const { headers, json } = response;
     switch (type) {
       case GET_LIST:
-      case GET_MANY:
-      case GET_MANY_REFERENCE:
         const headerName = 'Content-Range';
         if (!headers.has(headerName)) {
           throw new Error(
@@ -191,5 +156,7 @@ export const epilogueClient = (apiUrl, httpClient) => {
     );
   };
 };
+window.mondaClient = epilogueClient;
+window.mondaFetchJson = fetchJson;
 
 export default epilogueClient(process.env.REACT_APP_API_URL, fetchJson);

@@ -16,6 +16,9 @@ function BookListList(props) {
       property: 'title',
       header: 'Title',
       primary: true,
+      uiProps: {
+        flexGrow: 1,
+      },
     },
   ];
   return <ListController {...props} columns={columns} resource="books" />;

@@ -1,41 +1,38 @@
 import React from 'react';
-import { paginate } from './../utils';
+import { TablePagination } from 'rsuite';
 
 function Pagination(props) {
   const { resource, crudHandler, list } = props;
   const { total, params } = list;
   const { page, perPage } = params;
 
-  const handleClick = page => crudHandler.filter({ page }, { resource });
-  const handlePerPage = e => {
-    crudHandler.filter({ perPage: parseInt(e.target.value, 10) }, { resource });
+  const handleChangePage = page => crudHandler.filter({ page }, { resource });
+  const handleChangeLength = value => {
+    crudHandler.filter({ perPage: value }, { resource });
   };
 
-  const pgData = paginate(total, page, perPage);
-
-  const getStyle = idx => ({
-    background: page === idx ? '#7D4CDB' : 'white',
-    pointerEvents: page === idx ? 'none' : 'auto',
-    padding: '5px',
-    marginRight: '2px',
-    fontWeight: 'bold',
-    border: '1px solid grey',
-    cursor: 'pointer',
-  });
-
   return (
-    <div>
-      {pgData.pages.map(i => (
-        <span key={i} onClick={() => handleClick(i)} style={getStyle(i)}>
-          {i}
-        </span>
-      ))}
-      <select onChange={handlePerPage} value={perPage}>
-        <option value="5">5</option>
-        <option value="10">10</option>
-        <option value="20">20</option>
-      </select>
-    </div>
+    <TablePagination
+      lengthMenu={[
+        {
+          value: 5,
+          label: 5,
+        },
+        {
+          value: 10,
+          label: 10,
+        },
+        {
+          value: 20,
+          label: 20,
+        },
+      ]}
+      activePage={page}
+      displayLength={perPage}
+      total={total}
+      onChangePage={handleChangePage}
+      onChangeLength={handleChangeLength}
+    />
   );
 }
 

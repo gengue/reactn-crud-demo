@@ -2,7 +2,8 @@ import React, { memo, useState, useEffect } from 'react';
 import { withGlobal } from 'reactn';
 import { Link, withRouter } from 'react-router-dom';
 import { APP_KEY } from './../constants';
-import { Box, Button } from 'grommet/components';
+import { Box } from 'grommet/components';
+import { Button } from 'rsuite';
 import { resolveRedirect } from './utils';
 
 function FormController({
@@ -78,9 +79,11 @@ function FormController({
         justify="between"
       >
         <Link to={resolveRedirect('list', basePath)}>
-          <Button label="Back" />
+          <Button appearance="ghost">Back</Button>
         </Link>
-        <Button label="Save" type="submit" />
+        <Button appearance="primary" type="submit">
+          Save
+        </Button>
       </Box>
       <Box
         direction="row"
@@ -96,7 +99,9 @@ function FormController({
               value={form[child.props.name] || ''}
             />
           ))}
-          <Button label="Save" type="submit" />
+          <Button type="submit" appearance="primary">
+            Save{' '}
+          </Button>
         </div>
       </Box>
     </form>

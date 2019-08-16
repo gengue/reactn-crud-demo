@@ -1,5 +1,5 @@
 import { addReducers, getDispatch } from 'reactn';
-import { PREFIX, LOADING_KEY, APP_KEY } from './../../constants';
+import { GET_LIST, GET_ONE, PREFIX, LOADING_KEY, APP_KEY } from './../../constants';
 
 function getSuccess() {
   return (global, dispatch, action, meta) => {
@@ -47,15 +47,18 @@ function getSuccess() {
 }
 
 export function readReducer() {
+  const ACTION_NAME_LIST = `${PREFIX}${GET_LIST}`;
+  const ACTION_NAME_ONE = `${PREFIX}${GET_ONE}`;
+
   addReducers({
-    [`${PREFIX}GET_LIST_SUCCESS`]: getSuccess(),
-    [`${PREFIX}GET_ONE_SUCCESS`]: getSuccess(),
+    [ACTION_NAME_LIST]: getSuccess(),
+    [ACTION_NAME_ONE]: getSuccess(),
   });
 
   const dispatchers = getDispatch();
   return {
-    getListSuccess: dispatchers[`${PREFIX}GET_LIST_SUCCESS`],
-    getOneSuccess: dispatchers[`${PREFIX}GET_ONE_SUCCESS`],
+    getListSuccess: dispatchers[ACTION_NAME_LIST],
+    getOneSuccess: dispatchers[ACTION_NAME_ONE],
   };
 }
 

@@ -1,8 +1,10 @@
 import { addReducer, getDispatch } from 'reactn';
-import { PREFIX, SAVING_KEY, APP_KEY } from './../../constants';
+import { UPDATE, PREFIX, SAVING_KEY, APP_KEY } from './../../constants';
 
 export function updateReducers() {
-  addReducer(`${PREFIX}UPDATE_SUCCESS`, (global, dispatch, action, meta) => {
+  const ACTION_NAME = `${PREFIX}${UPDATE}`;
+
+  addReducer(ACTION_NAME, (global, dispatch, action, meta) => {
     const admin = { ...global[APP_KEY] };
     const { resource } = meta;
     const { resources } = admin;
@@ -26,7 +28,7 @@ export function updateReducers() {
 
   const dispatchers = getDispatch();
   return {
-    updateSuccess: dispatchers[`${PREFIX}UPDATE_SUCCESS`],
+    updateSuccess: dispatchers[ACTION_NAME],
   };
 }
 

@@ -1,8 +1,10 @@
 import { addReducer, getDispatch } from 'reactn';
-import { PREFIX, SAVING_KEY, APP_KEY } from './../../constants';
+import { DELETE, PREFIX, SAVING_KEY, APP_KEY } from './../../constants';
 
 export function deleteReducers() {
-  addReducer(`${PREFIX}DELETE_SUCCESS`, (global, dispatch, action, meta) => {
+  const ACTION_NAME = `${PREFIX}${DELETE}`;
+
+  addReducer(ACTION_NAME, (global, dispatch, action, meta) => {
     const { resource } = meta;
     const admin = { ...global[APP_KEY] };
     const { resources } = admin;
@@ -31,7 +33,7 @@ export function deleteReducers() {
 
   const dispatchers = getDispatch();
   return {
-    deleteSuccess: dispatchers[`${PREFIX}DELETE_SUCCESS`],
+    deleteSuccess: dispatchers[ACTION_NAME],
   };
 }
 export default deleteReducers;

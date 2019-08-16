@@ -1,3 +1,5 @@
+import { DELETE } from './../../constants';
+
 /**
  * deleteResource
  * @param {object} dispatchers - all dispatcher functions
@@ -6,7 +8,7 @@
  */
 function deleteResource(dispatchers, resource) {
   return (id, sideEffectsCb) => {
-    const meta = { resource, intent: 'DELETE' };
+    const meta = { resource, intent: DELETE };
     dispatchers.fetchStart({}, meta);
     // send the request
     // e.g. /users?page=1&limit=20

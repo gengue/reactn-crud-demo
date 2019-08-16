@@ -1,9 +1,11 @@
 import { addReducer, getDispatch } from 'reactn';
-import { PREFIX, APP_KEY } from './../../constants';
+import { REGISTER_RESOURCE, PREFIX, APP_KEY } from './../../constants';
 
 // initialize resource default state
 export function resourceReducer() {
-  addReducer(`${PREFIX}REGISTER_RESOURCE`, (global, dispatch, action, meta) => {
+  const ACTION_NAME = `${PREFIX}${REGISTER_RESOURCE}`;
+
+  addReducer(ACTION_NAME, (global, dispatch, action, meta) => {
     const admin = { ...global[APP_KEY] };
     const { resource, config } = meta;
     return {
@@ -38,7 +40,7 @@ export function resourceReducer() {
 
   const dispatchers = getDispatch();
   return {
-    registerResource: dispatchers[`${PREFIX}REGISTER_RESOURCE`],
+    registerResource: dispatchers[ACTION_NAME],
   };
 }
 

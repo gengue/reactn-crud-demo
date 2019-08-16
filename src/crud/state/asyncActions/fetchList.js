@@ -1,4 +1,5 @@
 import queryString from 'query-string';
+import { GET_LIST } from './../../constants';
 
 /**
  * fetchList
@@ -8,7 +9,7 @@ import queryString from 'query-string';
  */
 function fetchList(dispatchers, resource) {
   return (params = {}, replaceExisting) => {
-    const meta = { replace: replaceExisting, resource, intent: 'GET_LIST' };
+    const meta = { replace: replaceExisting, resource, intent: GET_LIST };
     dispatchers.fetchStart({}, meta);
     // send the request
     // e.g. /users?page=1&limit=20

@@ -1,7 +1,7 @@
 import UserForm from './UserForm';
 import UserList from './UserList';
 import UserShow from './UserShow';
-import crud from './../../crud';
+import { crud } from './../../crud';
 
 const config = {
   basePath: '/',

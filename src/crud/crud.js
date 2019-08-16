@@ -5,7 +5,7 @@ import { getConfig } from './utils';
 /**
  * crud
  * @param {string} resource
- * @param {object} config
+ * @param {object} config - resource fongi
  * @returns {object} - object with routes and actions
  */
 export function crud(resource, config) {

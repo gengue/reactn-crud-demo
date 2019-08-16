@@ -1,7 +1,7 @@
 import BookForm from './BookForm';
 import BookList from './BookList';
 import BookShow from './BookShow';
-import crud from './../../crud';
+import { crud } from './../../crud';
 
 const config = {
   props: {

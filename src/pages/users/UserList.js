@@ -15,21 +15,52 @@ function UserList(props) {
           />
         );
       },
+      uiProps: {
+        width: 80,
+      },
     },
     {
       property: 'email',
       header: 'Email',
       primary: true,
+      uiProps: {
+        resizable: true,
+        sortable: true,
+        width: 250,
+        verticalAlign: 'middle',
+      },
     },
     {
       property: 'first_name',
       header: 'First Name',
+      uiProps: {
+        resizable: true,
+        sortable: true,
+        width: 250,
+        verticalAlign: 'middle',
+      },
     },
     {
       property: 'last_name',
       header: 'Last Name',
+      uiProps: {
+        resizable: true,
+        sortable: true,
+        width: 250,
+        verticalAlign: 'middle',
+      },
     },
   ];
-  return <ListController {...props} columns={columns} resource="users" />;
+  const tableProps = {
+    wordWrap: true,
+  };
+  return (
+    <ListController
+      {...props}
+      columns={columns}
+      resource="users"
+      listProps={tableProps}
+    />
+  );
 }
 export default UserList;

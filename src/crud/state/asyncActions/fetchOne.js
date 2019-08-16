@@ -1,3 +1,5 @@
+import { GET_ONE } from './../../constants';
+
 /**
  * fetchOne
  * @param {object} dispatchers - all dispatcher functions
@@ -6,7 +8,7 @@
  */
 function fetchOne(dispatchers, resource) {
   return id => {
-    const meta = { resource, intent: 'GET_ONE' };
+    const meta = { resource, intent: GET_ONE };
     dispatchers.fetchStart({}, meta);
     // send the request
     // e.g. /users?page=1&limit=20

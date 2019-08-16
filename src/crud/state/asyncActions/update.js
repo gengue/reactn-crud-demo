@@ -1,4 +1,4 @@
-import { APP_KEY } from './../../constants';
+import { UPDATE, APP_KEY } from './../../constants';
 
 /**
  * update
@@ -8,7 +8,7 @@ import { APP_KEY } from './../../constants';
  */
 function update(dispatchers, resource) {
   return (id, formData, sideEffectsCb) => {
-    const meta = { resource, intent: 'UPDATE' };
+    const meta = { resource, intent: UPDATE };
     dispatchers.fetchStart({}, meta);
     // send the request
     // e.g. /users?page=1&limit=20

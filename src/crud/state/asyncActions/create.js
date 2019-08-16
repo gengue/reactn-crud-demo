@@ -1,3 +1,5 @@
+import { CREATE } from './../../constants';
+
 /**
  * create
  * @param {object} dispatchers - all dispatcher functions
@@ -6,7 +8,7 @@
  */
 function create(dispatchers, resource) {
   return (formData, sideEffectsCb) => {
-    const meta = { resource, intent: 'CREATE' };
+    const meta = { resource, intent: CREATE };
     dispatchers.fetchStart({}, meta);
     // send the request
     // e.g. /users?page=1&limit=20
