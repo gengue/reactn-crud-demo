@@ -1,16 +1,19 @@
 import React, { Fragment, useEffect, useState, useMemo, memo } from 'react';
 import get from 'lodash/get';
 import { withGlobal } from 'reactn';
+import { useDebounce } from 'use-debounce';
 import { Link } from 'react-router-dom';
 import { APP_KEY } from './../constants';
 import Pagination from './components/Pagination';
 import { resolveRedirect } from './utils';
 import {
+  InputGroup,
+  Input,
   IconButton,
   Table,
   Grid,
   Row,
-  Button,
+  Col,
   Icon,
   Header,
   Content,
@@ -36,12 +39,36 @@ const ListController = function(props) {
   const { basePath } = data.props;
 
   const [sort, setSort] = useState({});
+  const [rawSearch, setSearch] = useState(null);
+  const [searchText] = useDebounce(rawSearch, 350);
 
   useEffect(
     () => {
       crudHandler.fetchList(data.list.params);
     },
     [data.list.params, crudHandler]
+  );
+
+  useEffect(
+    () => {
+      if (sort !== null) {
+        crudHandler.filter(
+          { sort: sort.sortColumn, order: sort.sortType },
+          { resource }
+        );
+      }
+    },
+    [sort, crudHandler, resource]
+  );
+
+  useEffect(
+    () => {
+      if (searchText !== null) {
+        console.log('va a mandar esta caga', searchText);
+        crudHandler.filter({ search: searchText }, { resource });
+      }
+    },
+    [searchText, crudHandler, resource]
   );
 
   const dataset = useMemo(
@@ -71,6 +98,8 @@ const ListController = function(props) {
     console.log('handleSortColumn', sortColumn, sortType);
   };
 
+  const handleSearch = value => setSearch(value);
+
   return (
     <Fragment>
       <Header>
@@ -78,10 +107,45 @@ const ListController = function(props) {
       </Header>
       <Content>
         <Grid fluid>
-          <Row style={{ textAlign: 'right' }}>
-            <Link to={resolveRedirect('create', basePath)}>
-              <Button appearance="primary">Create</Button>
-            </Link>
+          <Row gutter={20} style={{ marginBottom: 10 }}>
+            <Col md={10}>
+              <InputGroup inside>
+                <Input
+                  placeholder="Please type your search..."
+                  value={rawSearch || ''}
+                  onChange={handleSearch}
+                />
+                <InputGroup.Button>
+                  <Icon icon="search" />
+                </InputGroup.Button>
+              </InputGroup>
+            </Col>
+            <Col md={14} style={{ textAlign: 'right' }}>
+              <IconButton
+                style={{ marginRight: '8px' }}
+                icon={<Icon icon="filter" />}
+                onClick={() => console.log('filters')}
+              >
+                Filters
+              </IconButton>
+              <IconButton
+                style={{ marginRight: '8px' }}
+                icon={<Icon icon="columns" />}
+                onClick={() => console.log('columns settings')}
+              >
+                Columns
+              </IconButton>
+              <Link to={resolveRedirect('create', basePath)}>
+                <IconButton
+                  appearance="primary"
+                  style={{ marginRight: '8px' }}
+                  icon={<Icon icon="plus" />}
+                  onClick={() => console.log('filters')}
+                >
+                  New
+                </IconButton>
+              </Link>
+            </Col>
           </Row>
           <Row>
             <Table
@@ -151,15 +215,15 @@ function getColumns(columns, config, crudHandler) {
     }),
     {
       property: '',
-      header: '',
+      header: 'Actions',
       render: record => {
         return (
           <Fragment>
             {hasEdit && (
               <Link to={resolveRedirect('edit', basePath, record.id, record)}>
                 <IconButton
-                  color="cyan"
                   size="sm"
+                  appearance="ghost"
                   icon={<Icon icon="edit2" />}
                 />
               </Link>
@@ -167,6 +231,7 @@ function getColumns(columns, config, crudHandler) {
             {hasDelete && (
               <IconButton
                 style={{ marginLeft: '5px' }}
+                appearance="ghost"
                 color="red"
                 size="sm"
                 icon={<Icon icon="trash2" />}
@@ -180,7 +245,7 @@ function getColumns(columns, config, crudHandler) {
         flexGrow: 1,
         verticalAlign: 'middle',
         align: 'right',
-        fixed: 'right',
+        fixed: columns.length > 5 ? 'right' : undefined,
       },
     },
   ];

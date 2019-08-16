@@ -17,7 +17,8 @@ function BookListList(props) {
       header: 'Title',
       primary: true,
       uiProps: {
-        flexGrow: 1,
+        width: 300,
+        //flexGrow: 2,
       },
     },
   ];
