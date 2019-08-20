@@ -1,14 +1,29 @@
 import React from 'react';
-import { TextInput } from 'grommet/components';
+import { Input } from 'rsuite';
 import { FormController } from './../../crud/ui';
+import SelectPickerFetch from './../../components/SelectPickerFetch';
 
 function UserForm(props) {
   return (
     <FormController {...props} resource="users">
-      <TextInput name="email" placeholder="Email" type="email" required />
-      <TextInput name="first_name" placeholder="First Name" required />
-      <TextInput name="last_name" placeholder="Last Name" required />
-      <TextInput name="avatar" placeholder="Avatar URL" />
+      <Input
+        source="email"
+        label="Email"
+        type="email"
+        required
+        helptext="Something real"
+      />
+      <Input source="first_name" label="First Name" required />
+      <Input source="last_name" label="Last Name" required />
+      <Input source="avatar" label="Avatar URL" />
+      <SelectPickerFetch
+        source="country"
+        label="Country"
+        resource="countries"
+        labelKey="name"
+        valueKey="name"
+        fetchOnMount
+      />
     </FormController>
   );
 }

@@ -1,10 +1,13 @@
 import React from 'react';
 import { ListController } from './../../crud/ui';
+import { Input } from 'rsuite';
+import SelectPickerFetch from './../../components/SelectPickerFetch';
 
 function UserList(props) {
   const columns = [
     {
       property: 'avatar',
+      header: 'Avatar',
       primary: true,
       render: record => {
         return (
@@ -26,7 +29,7 @@ function UserList(props) {
       uiProps: {
         resizable: true,
         sortable: true,
-        width: 250,
+        width: 230,
         verticalAlign: 'middle',
       },
     },
@@ -36,7 +39,7 @@ function UserList(props) {
       uiProps: {
         resizable: true,
         sortable: true,
-        width: 250,
+        width: 230,
         verticalAlign: 'middle',
       },
     },
@@ -46,7 +49,17 @@ function UserList(props) {
       uiProps: {
         resizable: true,
         sortable: true,
-        width: 250,
+        width: 230,
+        verticalAlign: 'middle',
+      },
+    },
+    {
+      property: 'country',
+      header: 'Country',
+      uiProps: {
+        resizable: true,
+        sortable: true,
+        width: 180,
         verticalAlign: 'middle',
       },
     },
@@ -54,11 +67,22 @@ function UserList(props) {
   const tableProps = {
     wordWrap: true,
   };
+  const filters = [
+    <SelectPickerFetch
+      source="country"
+      resource="countries"
+      placeholder="Country"
+      labelKey="name"
+      valueKey="id"
+    />,
+    <Input placeholder="Other" source="other" />,
+  ];
   return (
     <ListController
       {...props}
-      columns={columns}
       resource="users"
+      columns={columns}
+      filters={filters}
       listProps={tableProps}
     />
   );

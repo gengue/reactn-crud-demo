@@ -5,6 +5,7 @@ import { useDebounce } from 'use-debounce';
 import { Link } from 'react-router-dom';
 import { APP_KEY } from './../constants';
 import Pagination from './components/Pagination';
+import Filters from './components/Filters';
 import { resolveRedirect } from './utils';
 import {
   InputGroup,
@@ -17,38 +18,64 @@ import {
   Icon,
   Header,
   Content,
+  Alert,
 } from 'rsuite';
-
+import { Popover, Popconfirm, Checkbox } from 'antd';
 const { Column, HeaderCell, Cell } = Table;
 
+// table props by default
 const defaultListProps = {
   wordWrap: true,
   autoHeight: true,
 };
+const buttonMarginStyle = { marginLeft: '8px' };
+
+// initialize colums on true
+function defaultColDisplay(columns) {
+  return columns.reduce((a, i) => ({ [i.property]: true, ...a }), {});
+}
 
 const ListController = function(props) {
   const {
-    columns,
-    data,
     resource,
+    columns,
+    filters,
+    data,
     loading,
     fetching,
+    saving,
     crudHandler,
     listProps,
   } = props;
   const { basePath } = data.props;
 
-  const [sort, setSort] = useState({});
+  const [sort, setSort] = useState(null);
   const [rawSearch, setSearch] = useState(null);
   const [searchText] = useDebounce(rawSearch, 350);
+  const [showFilters, setShowFilters] = useState(false);
+  const [displayedColumns, setDisplayedColumns] = useState(
+    defaultColDisplay(columns)
+  );
+  const activeFilters = useMemo(
+    () => {
+      return Object.keys(data.list.params.filter).filter(
+        key => data.list.params.filter[key] !== null
+      );
+    },
+    [data.list.params.filter]
+  );
+  const hasFilters = activeFilters.length > 0;
 
+  // init
   useEffect(
     () => {
       crudHandler.fetchList(data.list.params);
+      document.title = resource;
     },
-    [data.list.params, crudHandler]
+    [data.list.params, crudHandler, resource]
   );
 
+  // on sort column
   useEffect(
     () => {
       if (sort !== null) {
@@ -61,16 +88,17 @@ const ListController = function(props) {
     [sort, crudHandler, resource]
   );
 
+  // on search
   useEffect(
     () => {
       if (searchText !== null) {
-        console.log('va a mandar esta caga', searchText);
         crudHandler.filter({ search: searchText }, { resource });
       }
     },
     [searchText, crudHandler, resource]
   );
 
+  // collect table data mapping `ids` and `data`
   const dataset = useMemo(
     () => {
       if (!data) return [];
@@ -79,12 +107,13 @@ const ListController = function(props) {
     [data]
   );
 
-  const fields = useMemo(() => getColumns(columns, data.props, crudHandler), [
-    columns,
-    data.props,
-    crudHandler,
-  ]);
+  // get table columns, merge definitions and append actions (edit, delete)
+  const fields = useMemo(
+    () => getColumns(columns, displayedColumns, data.props, crudHandler),
+    [columns, displayedColumns, data.props, crudHandler]
+  );
 
+  // get/merge props for `Table` component
   const tableProps = useMemo(
     () => ({
       ...defaultListProps,
@@ -93,17 +122,36 @@ const ListController = function(props) {
     [listProps]
   );
 
+  /**
+   * handler methods
+   */
+  const handleColumnDisplay = (e, column) => {
+    setDisplayedColumns({ ...displayedColumns, [column]: e.target.checked });
+  };
   const handleSortColumn = (sortColumn, sortType) => {
     setSort({ sortColumn, sortType });
-    console.log('handleSortColumn', sortColumn, sortType);
   };
-
+  const handleToggleFilters = () => {
+    setShowFilters(!showFilters);
+  };
   const handleSearch = value => setSearch(value);
+
+  // get a checkbox components list with all fields
+  const fieldList = columns.map((field, idx) => (
+    <div key={field.property}>
+      <Checkbox
+        checked={displayedColumns[field.property]}
+        onChange={e => handleColumnDisplay(e, field.property)}
+      >
+        {field.header || field.property}
+      </Checkbox>
+    </div>
+  ));
 
   return (
     <Fragment>
       <Header>
-        <h2>List Controller</h2>
+        <h2>List {resource}</h2>
       </Header>
       <Content>
         <Grid fluid>
@@ -121,24 +169,44 @@ const ListController = function(props) {
               </InputGroup>
             </Col>
             <Col md={14} style={{ textAlign: 'right' }}>
-              <IconButton
-                style={{ marginRight: '8px' }}
-                icon={<Icon icon="filter" />}
-                onClick={() => console.log('filters')}
+              {filters && (
+                <IconButton
+                  icon={
+                    showFilters ? (
+                      <Icon icon="close-circle" />
+                    ) : (
+                      <Icon icon="filter" />
+                    )
+                  }
+                  onClick={handleToggleFilters}
+                >
+                  {showFilters ? 'Hide Filters' : 'Filters'}
+                  {hasFilters && (
+                    <b>
+                      &nbsp;(
+                      {activeFilters.length})
+                    </b>
+                  )}
+                </IconButton>
+              )}
+              <Popover
+                content={fieldList}
+                title="Columns to display"
+                trigger="click"
               >
-                Filters
-              </IconButton>
-              <IconButton
-                style={{ marginRight: '8px' }}
-                icon={<Icon icon="columns" />}
-                onClick={() => console.log('columns settings')}
+                <IconButton
+                  style={buttonMarginStyle}
+                  icon={<Icon icon="columns" />}
+                >
+                  Columns
+                </IconButton>
+              </Popover>
+              <Link
+                to={resolveRedirect('create', basePath)}
+                style={buttonMarginStyle}
               >
-                Columns
-              </IconButton>
-              <Link to={resolveRedirect('create', basePath)}>
                 <IconButton
                   appearance="primary"
-                  style={{ marginRight: '8px' }}
                   icon={<Icon icon="plus" />}
                   onClick={() => console.log('filters')}
                 >
@@ -147,12 +215,20 @@ const ListController = function(props) {
               </Link>
             </Col>
           </Row>
+          {filters && (
+            <Filters
+              open={showFilters}
+              resource={resource}
+              fields={filters}
+              crudHandler={crudHandler}
+            />
+          )}
           <Row>
             <Table
               data={dataset}
-              loading={loading || fetching}
-              sortColumn={sort.sortColumn}
-              sortType={sort.sortType}
+              loading={loading || fetching || saving}
+              sortColumn={sort ? sort.sortColumn : undefined}
+              sortType={sort ? sort.sortType : undefined}
               onSortColumn={handleSortColumn}
               {...tableProps}
             >
@@ -174,7 +250,6 @@ const ListController = function(props) {
             </Table>
             <Pagination
               resource={resource}
-              perPage={5}
               crudHandler={crudHandler}
               list={data.list}
               loading={loading}
@@ -186,39 +261,41 @@ const ListController = function(props) {
   );
 };
 
-function getColumns(columns, config, crudHandler) {
+function getColumns(columns, displayedColumns, config, crudHandler) {
   const { basePath, hasEdit, hasDelete } = config;
 
   function deleteSideEffect({ success, error }) {
     if (success) {
-      console.log('Sisas, eliminado todo bien');
+      Alert.success('Resource deleted successfully');
     } else {
-      console.log('Ocurrio cule error hp', error);
+      Alert.error(error);
     }
   }
 
   const handleDelete = id => crudHandler.delete(id, deleteSideEffect);
 
   return [
-    ...columns.map((field, idx) => {
+    ...columns.filter(f => displayedColumns[f.property]).map((field, idx) => {
       const customRender = field.render;
       // wrap into a Link
-      if (field.primary) {
+      if (field.primary && !field.touched) {
         field.render = record => (
           <Link to={resolveRedirect('show', basePath, record.id)}>
             {customRender ? customRender(record) : get(record, field.property)}
           </Link>
         );
+        // to avoid nested links (recursive renders)
+        field.touched = true;
       }
       // return original definition
       return field;
     }),
     {
-      property: '',
+      property: '_table_actions',
       header: 'Actions',
       render: record => {
         return (
-          <Fragment>
+          <div>
             {hasEdit && (
               <Link to={resolveRedirect('edit', basePath, record.id, record)}>
                 <IconButton
@@ -229,23 +306,25 @@ function getColumns(columns, config, crudHandler) {
               </Link>
             )}
             {hasDelete && (
-              <IconButton
-                style={{ marginLeft: '5px' }}
-                appearance="ghost"
-                color="red"
-                size="sm"
-                icon={<Icon icon="trash2" />}
-                onClick={() => handleDelete(record.id)}
-              />
+              <ConfirmDelete onConfirm={() => handleDelete(record.id)}>
+                <IconButton
+                  style={{ marginLeft: '5px' }}
+                  appearance="ghost"
+                  color="red"
+                  size="sm"
+                  icon={<Icon icon="trash2" />}
+                />
+              </ConfirmDelete>
             )}
-          </Fragment>
+          </div>
         );
       },
       uiProps: {
+        minWidth: 80,
         flexGrow: 1,
         verticalAlign: 'middle',
         align: 'right',
-        fixed: columns.length > 5 ? 'right' : undefined,
+        fixed: columns.length >= 5 ? 'right' : undefined,
       },
     },
   ];
@@ -253,6 +332,18 @@ function getColumns(columns, config, crudHandler) {
 
 ListController.defaultProps = {
   listProps: defaultListProps,
+};
+
+const ConfirmDelete = ({ onConfirm, children }) => {
+  return (
+    <Popconfirm
+      title="Are you sure that you want to delete the selected element?"
+      onConfirm={onConfirm}
+      okText="Yes, delete it"
+    >
+      {children}
+    </Popconfirm>
+  );
 };
 
 export default props => {
@@ -264,6 +355,7 @@ export default props => {
     loading:
       !global[APP_KEY].resources[resource].list.loadedOnce &&
       global[APP_KEY].loading,
+    saving: global[APP_KEY].saving,
   });
 
   const Controller = withGlobal(mapStateToProps)(memo(ListController));

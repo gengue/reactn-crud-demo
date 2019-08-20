@@ -18,8 +18,9 @@ function fetchList(dispatchers, resource) {
       page: params.page || 1,
       limit: params.perPage || 10,
       search: params.search,
-      sortBy: params.sort,
+      sortBy: params.sort || undefined,
       order: params.order,
+      ...params.filter,
     });
     const url = `https://5d543b8b36ad770014ccd65a.mockapi.io/api/${resource}?${query}`;
     // TODO: 1. use our custom fetch to attach token

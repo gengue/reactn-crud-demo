@@ -1,10 +1,19 @@
-import React, { memo, useState, useEffect } from 'react';
+import React, { Fragment, memo, useState, useEffect } from 'react';
 import { withGlobal } from 'reactn';
 import { Link, withRouter } from 'react-router-dom';
 import { APP_KEY } from './../constants';
-import { Box } from 'grommet/components';
-import { Button } from 'rsuite';
 import { resolveRedirect } from './utils';
+import {
+  ButtonToolbar,
+  Header,
+  Content,
+  Button,
+  Form,
+  FormGroup,
+  ControlLabel,
+  HelpBlock,
+  Alert,
+} from 'rsuite';
 
 function FormController({
   data,
@@ -35,23 +44,27 @@ function FormController({
     [user, resourceId, isEdit, crudHandler]
   );
 
-  const handleChange = e => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (rawValue, name) => {
+    let value = rawValue;
+    if (rawValue && rawValue.target) {
+      value = rawValue.target.value;
+    }
+    setForm({ ...form, [name]: value });
   };
 
   const submitSideEffect = type => ({ success, record, error }) => {
     if (type === 'create' && success) {
-      console.log('Sisas, creado todo bien');
+      Alert.success('Created successfully');
       const url = resolveRedirect(redirectTo, basePath, record.id, record);
       history.push(url);
     }
     if (type === 'edit' && success) {
-      console.log('Sisas, editado todo bien');
+      Alert.success('Updated successfully');
       const url = resolveRedirect(redirectTo, basePath, record.id, record);
       history.push(url);
     }
     if (!success) {
-      console.log('Ocurrio cule error hp', error);
+      Alert.error(error);
     }
   };
 
@@ -64,47 +77,53 @@ function FormController({
         crudHandler.create(form, submitSideEffect('create'));
       }
     } catch (e) {
-      console.log('hubo un jodido error');
-      console.log(e);
+      Alert.error(e.toString());
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Box
-        direction="row"
-        border={{ color: 'brand', size: 'small', style: 'dashed' }}
-        pad="medium"
-        margin="medium"
-        justify="between"
-      >
-        <Link to={resolveRedirect('list', basePath)}>
-          <Button appearance="ghost">Back</Button>
-        </Link>
-        <Button appearance="primary" type="submit">
-          Save
-        </Button>
-      </Box>
-      <Box
-        direction="row"
-        border={{ color: 'brand', size: 'medium', style: 'dashed' }}
-        pad="medium"
-        margin="medium"
-      >
-        <div>
-          {React.Children.map(children, child => (
-            <child.type
-              {...child.props}
-              onChange={handleChange}
-              value={form[child.props.name] || ''}
-            />
-          ))}
-          <Button type="submit" appearance="primary">
-            Save{' '}
-          </Button>
-        </div>
-      </Box>
-    </form>
+    <Fragment>
+      <Header>
+        <h2>
+          {isEdit ? 'Edit' : 'New'}
+          &nbsp; {resource}
+        </h2>
+      </Header>
+      <Content>
+        <Form onSubmit={handleSubmit} layout="horizontal">
+          <div>
+            {React.Children.map(children, child => (
+              <FormGroup>
+                <ControlLabel>{child.props.label}</ControlLabel>
+                <child.type
+                  {...child.props}
+                  onChange={e => handleChange(e, child.props.source)}
+                  value={form[child.props.source] || ''}
+                  style={{
+                    minWidth: '300px',
+                    width: 'auto',
+                    ...child.props.style,
+                  }}
+                />
+                {child.props.helptext && (
+                  <HelpBlock tooltip>{child.props.helptext}</HelpBlock>
+                )}
+              </FormGroup>
+            ))}
+            <FormGroup>
+              <ButtonToolbar>
+                <Link to={resolveRedirect('list', basePath)}>
+                  <Button appearance="ghost">Cancel</Button>
+                </Link>
+                <Button type="submit" appearance="primary">
+                  Save{' '}
+                </Button>
+              </ButtonToolbar>
+            </FormGroup>
+          </div>
+        </Form>
+      </Content>
+    </Fragment>
   );
 }
 

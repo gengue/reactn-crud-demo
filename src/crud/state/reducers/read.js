@@ -1,5 +1,11 @@
 import { addReducers, getDispatch } from 'reactn';
-import { GET_LIST, GET_ONE, PREFIX, LOADING_KEY, APP_KEY } from './../../constants';
+import {
+  GET_LIST,
+  GET_ONE,
+  PREFIX,
+  LOADING_KEY,
+  APP_KEY,
+} from './../../constants';
 
 function getSuccess() {
   return (global, dispatch, action, meta) => {
@@ -34,7 +40,7 @@ function getSuccess() {
               : { ...resources[resource].data, ...newData },
             list: {
               ...resources[resource].list,
-              //params: { ...resources[resource].list, ...action.params },
+              //params: { ...resources[resource].list.params, ...action.params },
               ids,
               loadedOnce: true,
               total: action.total,
