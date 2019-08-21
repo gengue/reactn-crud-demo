@@ -2,8 +2,7 @@ import React, { memo, Fragment, useEffect } from 'react';
 import get from 'lodash/get';
 import { withGlobal } from 'reactn';
 import { Link, withRouter } from 'react-router-dom';
-import { Box, Text } from 'grommet/components';
-import { Button } from 'rsuite';
+import { List, Typography, Button } from 'antd';
 import { APP_KEY } from './../constants';
 import { resolveRedirect } from './utils';
 
@@ -27,43 +26,40 @@ function ShowController({ data, loading, fields, match, crudHandler }) {
 
   return (
     <Fragment>
-      <Box
-        direction="row"
-        border={{ color: 'brand', size: 'small', style: 'dashed' }}
-        pad="medium"
-        margin="medium"
-        justify="between"
-      >
-        <Link to={resolveRedirect('list', basePath)}>
-          <Button appearance="ghost">Back</Button>
-        </Link>
-        <Link to={resolveRedirect('edit', basePath, record.id)}>
-          <Button appearance="primary">Edit</Button>
-        </Link>
-      </Box>
-      <Box
-        direction="column"
-        border={{ color: 'brand', size: 'medium', style: 'dashed' }}
-        pad="medium"
-        margin="medium"
-      >
-        {fields.map((field, idx) => {
-          const content = field.render
-            ? field.render(record)
-            : get(record, field.property);
-          return (
-            <div key={field.property || idx}>
-              {field.label && (
-                <Text weight="bold" margin={{ right: '10px' }}>
-                  {field.label}:
-                </Text>
-              )}
-              {content}
-              <br />
+      <h2 className="MainLayout-header">Details</h2>
+      <section className="MainLayout-content">
+        <List
+          header={
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Link to={resolveRedirect('list', basePath)}>
+                <Button ghost type="primary" icon="left">
+                  Back
+                </Button>
+              </Link>
+              <Link to={resolveRedirect('edit', basePath, record.id)}>
+                <Button type="primary" icon="pencil">
+                  Edit
+                </Button>
+              </Link>
             </div>
-          );
-        })}
-      </Box>
+          }
+          bordered={false}
+          dataSource={fields}
+          renderItem={item => {
+            const content = item.render
+              ? item.render(record)
+              : get(record, item.dataIndex);
+            return (
+              <List.Item>
+                <Typography.Text strong>
+                  {item.title ? item.title + ':' : null}{' '}
+                </Typography.Text>{' '}
+                {content}
+              </List.Item>
+            );
+          }}
+        />
+      </section>
     </Fragment>
   );
 }

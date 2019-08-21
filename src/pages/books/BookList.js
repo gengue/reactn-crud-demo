@@ -4,22 +4,20 @@ import { ListController } from './../../crud/ui';
 function BookListList(props) {
   const columns = [
     {
-      property: 'cover',
+      title: 'Cover',
+      dataIndex: 'cover',
       primary: true,
-      render: record => {
+      render: (text, record, index) => {
         return (
           <img src={record.cover} style={{ height: '50px' }} alt="Cover" />
         );
       },
+      width: 30,
     },
     {
-      property: 'title',
-      header: 'Title',
+      title: 'Title',
+      dataIndex: 'title',
       primary: true,
-      uiProps: {
-        width: 300,
-        //flexGrow: 2,
-      },
     },
   ];
   return <ListController {...props} columns={columns} resource="books" />;

@@ -1,15 +1,15 @@
 import React from 'react';
 import { ListController } from './../../crud/ui';
-import { Input } from 'rsuite';
+import { Input } from 'antd';
 import SelectPickerFetch from './../../components/SelectPickerFetch';
 
 function UserList(props) {
   const columns = [
     {
-      property: 'avatar',
-      header: 'Avatar',
+      title: 'Avatar',
+      dataIndex: 'avatar',
       primary: true,
-      render: record => {
+      render: (text, record, index) => {
         return (
           <img
             src={record.avatar}
@@ -18,55 +18,34 @@ function UserList(props) {
           />
         );
       },
-      uiProps: {
-        width: 80,
-      },
+      width: 80,
     },
     {
-      property: 'email',
-      header: 'Email',
+      title: 'Email',
+      dataIndex: 'email',
       primary: true,
-      uiProps: {
-        resizable: true,
-        sortable: true,
-        width: 230,
-        verticalAlign: 'middle',
-      },
+      width: 230,
+      sorter: true,
     },
     {
-      property: 'first_name',
-      header: 'First Name',
-      uiProps: {
-        resizable: true,
-        sortable: true,
-        width: 230,
-        verticalAlign: 'middle',
-      },
+      title: 'First Name',
+      dataIndex: 'first_name',
+      sorter: true,
+      width: 230,
     },
     {
-      property: 'last_name',
-      header: 'Last Name',
-      uiProps: {
-        resizable: true,
-        sortable: true,
-        width: 230,
-        verticalAlign: 'middle',
-      },
+      title: 'Last Name',
+      dataIndex: 'last_name',
+      sorter: true,
+      width: 230,
     },
     {
-      property: 'country',
-      header: 'Country',
-      uiProps: {
-        resizable: true,
-        sortable: true,
-        width: 180,
-        verticalAlign: 'middle',
-      },
+      title: 'Country',
+      dataIndex: 'country',
+      sorter: true,
+      width: 180,
     },
   ];
-  const tableProps = {
-    wordWrap: true,
-  };
   const filters = [
     <SelectPickerFetch
       source="country"
@@ -83,7 +62,6 @@ function UserList(props) {
       resource="users"
       columns={columns}
       filters={filters}
-      listProps={tableProps}
     />
   );
 }

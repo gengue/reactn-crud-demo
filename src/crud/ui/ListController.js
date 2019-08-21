@@ -1,38 +1,28 @@
 import React, { Fragment, useEffect, useState, useMemo, memo } from 'react';
-import get from 'lodash/get';
 import { withGlobal } from 'reactn';
 import { useDebounce } from 'use-debounce';
 import { Link } from 'react-router-dom';
 import { APP_KEY } from './../constants';
-import Pagination from './components/Pagination';
 import Filters from './components/Filters';
 import { resolveRedirect } from './utils';
 import {
-  InputGroup,
+  Button,
+  message,
   Input,
-  IconButton,
-  Table,
-  Grid,
   Row,
   Col,
-  Icon,
-  Header,
-  Content,
-  Alert,
-} from 'rsuite';
-import { Popover, Popconfirm, Checkbox } from 'antd';
-const { Column, HeaderCell, Cell } = Table;
+  Popover,
+  Popconfirm,
+  Checkbox,
+  Table,
+} from 'antd';
 
 // table props by default
-const defaultListProps = {
-  wordWrap: true,
-  autoHeight: true,
-};
 const buttonMarginStyle = { marginLeft: '8px' };
 
 // initialize colums on true
 function defaultColDisplay(columns) {
-  return columns.reduce((a, i) => ({ [i.property]: true, ...a }), {});
+  return columns.reduce((a, i) => ({ [i.dataIndex]: true, ...a }), {});
 }
 
 const ListController = function(props) {
@@ -56,6 +46,24 @@ const ListController = function(props) {
   const [displayedColumns, setDisplayedColumns] = useState(
     defaultColDisplay(columns)
   );
+
+  // get pagination data from global state
+  const pagination = useMemo(
+    () => {
+      const { total, params } = data.list;
+      const { page, perPage } = params;
+      return {
+        current: page,
+        pageSize: perPage,
+        total,
+        showSizeChanger: true,
+        pageSizeOptions: ['5', '10', '20'],
+      };
+    },
+    [data.list]
+  );
+
+  // get active filters from global state
   const activeFilters = useMemo(
     () => {
       return Object.keys(data.list.params.filter).filter(
@@ -79,10 +87,8 @@ const ListController = function(props) {
   useEffect(
     () => {
       if (sort !== null) {
-        crudHandler.filter(
-          { sort: sort.sortColumn, order: sort.sortType },
-          { resource }
-        );
+        const order = sort.sortOrder === 'descend' ? 'DESC' : 'ASC';
+        crudHandler.filter({ sort: sort.sortField, order }, { resource });
       }
     },
     [sort, crudHandler, resource]
@@ -113,71 +119,57 @@ const ListController = function(props) {
     [columns, displayedColumns, data.props, crudHandler]
   );
 
-  // get/merge props for `Table` component
-  const tableProps = useMemo(
-    () => ({
-      ...defaultListProps,
-      ...listProps,
-    }),
-    [listProps]
-  );
-
   /**
    * handler methods
    */
   const handleColumnDisplay = (e, column) => {
     setDisplayedColumns({ ...displayedColumns, [column]: e.target.checked });
   };
-  const handleSortColumn = (sortColumn, sortType) => {
-    setSort({ sortColumn, sortType });
-  };
   const handleToggleFilters = () => {
     setShowFilters(!showFilters);
   };
-  const handleSearch = value => setSearch(value);
+  const handleSearch = e => setSearch(e.target.value);
+  const handleTableChange = (pagger, filters, sorter) => {
+    if (pagger && pagger.current) {
+      crudHandler.filter(
+        { page: pagger.current, perPage: pagger.pageSize },
+        { resource }
+      );
+    }
+    if (sorter && sorter.field) {
+      setSort({ sortField: sorter.field, sortOrder: sorter.order });
+    }
+  };
 
   // get a checkbox components list with all fields
   const fieldList = columns.map((field, idx) => (
-    <div key={field.property}>
+    <div key={field.dataIndex}>
       <Checkbox
-        checked={displayedColumns[field.property]}
-        onChange={e => handleColumnDisplay(e, field.property)}
+        checked={displayedColumns[field.dataIndex]}
+        onChange={e => handleColumnDisplay(e, field.dataIndex)}
       >
-        {field.header || field.property}
+        {field.title || field.dataIndex}
       </Checkbox>
     </div>
   ));
 
   return (
     <Fragment>
-      <Header>
-        <h2>List {resource}</h2>
-      </Header>
-      <Content>
-        <Grid fluid>
-          <Row gutter={20} style={{ marginBottom: 10 }}>
+      <h2 className="MainLayout-header">List {resource}</h2>
+      <section className="MainLayout-content">
+        <Row gutter={16}>
+          <Col span={24} style={{ marginBottom: '18px' }}>
             <Col md={10}>
-              <InputGroup inside>
-                <Input
-                  placeholder="Please type your search..."
-                  value={rawSearch || ''}
-                  onChange={handleSearch}
-                />
-                <InputGroup.Button>
-                  <Icon icon="search" />
-                </InputGroup.Button>
-              </InputGroup>
+              <Input.Search
+                placeholder="Please type your search..."
+                value={rawSearch || ''}
+                onChange={handleSearch}
+              />
             </Col>
             <Col md={14} style={{ textAlign: 'right' }}>
               {filters && (
-                <IconButton
-                  icon={
-                    showFilters ? (
-                      <Icon icon="close-circle" />
-                    ) : (
-                      <Icon icon="filter" />
-                    )
-                  }
+                <Button
+                  icon={showFilters ? 'close-circle' : 'filter'}
                   onClick={handleToggleFilters}
                 >
                   {showFilters ? 'Hide Filters' : 'Filters'}
@@ -187,34 +179,27 @@ const ListController = function(props) {
                       {activeFilters.length})
                     </b>
                   )}
-                </IconButton>
+                </Button>
               )}
               <Popover
                 content={fieldList}
                 title="Columns to display"
                 trigger="click"
               >
-                <IconButton
-                  style={buttonMarginStyle}
-                  icon={<Icon icon="columns" />}
-                >
+                <Button style={buttonMarginStyle} icon="unordered-list">
                   Columns
-                </IconButton>
+                </Button>
               </Popover>
               <Link
                 to={resolveRedirect('create', basePath)}
                 style={buttonMarginStyle}
               >
-                <IconButton
-                  appearance="primary"
-                  icon={<Icon icon="plus" />}
-                  onClick={() => console.log('filters')}
-                >
+                <Button type="primary" icon="plus">
                   New
-                </IconButton>
+                </Button>
               </Link>
             </Col>
-          </Row>
+          </Col>
           {filters && (
             <Filters
               open={showFilters}
@@ -223,40 +208,19 @@ const ListController = function(props) {
               crudHandler={crudHandler}
             />
           )}
-          <Row>
+          <Col span={24}>
             <Table
-              data={dataset}
+              columns={fields}
+              rowKey="id"
+              dataSource={dataset}
+              pagination={pagination}
               loading={loading || fetching || saving}
-              sortColumn={sort ? sort.sortColumn : undefined}
-              sortType={sort ? sort.sortType : undefined}
-              onSortColumn={handleSortColumn}
-              {...tableProps}
-            >
-              {fields.map((field, idx) => {
-                const uiProps = get(field, 'uiProps', {});
-                return (
-                  <Column {...uiProps} key={field.property || idx}>
-                    <HeaderCell>{field.header}</HeaderCell>
-                    {field.render ? (
-                      <Cell dataKey={field.property}>
-                        {rowData => field.render(rowData)}
-                      </Cell>
-                    ) : (
-                      <Cell dataKey={field.property} />
-                    )}
-                  </Column>
-                );
-              })}
-            </Table>
-            <Pagination
-              resource={resource}
-              crudHandler={crudHandler}
-              list={data.list}
-              loading={loading}
+              onChange={handleTableChange}
+              {...listProps}
             />
-          </Row>
-        </Grid>
-      </Content>
+          </Col>
+        </Row>
+      </section>
     </Fragment>
   );
 };
@@ -266,24 +230,29 @@ function getColumns(columns, displayedColumns, config, crudHandler) {
 
   function deleteSideEffect({ success, error }) {
     if (success) {
-      Alert.success('Resource deleted successfully');
+      message.success('Resource deleted successfully');
     } else {
-      Alert.error(error);
+      message.error(error);
     }
   }
 
   const handleDelete = id => crudHandler.delete(id, deleteSideEffect);
 
   return [
-    ...columns.filter(f => displayedColumns[f.property]).map((field, idx) => {
+    ...columns.filter(f => displayedColumns[f.dataIndex]).map((field, idx) => {
       const customRender = field.render;
       // wrap into a Link
       if (field.primary && !field.touched) {
-        field.render = record => (
-          <Link to={resolveRedirect('show', basePath, record.id)}>
-            {customRender ? customRender(record) : get(record, field.property)}
-          </Link>
-        );
+        field.render = (text, record, index) => {
+          return (
+            <Link
+              to={resolveRedirect('show', basePath, record.id)}
+              key={record.id}
+            >
+              {customRender ? customRender(text, record, index) : text}
+            </Link>
+          );
+        };
         // to avoid nested links (recursive renders)
         field.touched = true;
       }
@@ -291,48 +260,38 @@ function getColumns(columns, displayedColumns, config, crudHandler) {
       return field;
     }),
     {
-      property: '_table_actions',
-      header: 'Actions',
-      render: record => {
+      title: 'Actions',
+      dataIndex: '_table_actions',
+      render: (text, record, index) => {
         return (
           <div>
             {hasEdit && (
               <Link to={resolveRedirect('edit', basePath, record.id, record)}>
-                <IconButton
-                  size="sm"
-                  appearance="ghost"
-                  icon={<Icon icon="edit2" />}
-                />
+                <Button size="small" type="primary" icon="edit" ghost />
               </Link>
             )}
             {hasDelete && (
               <ConfirmDelete onConfirm={() => handleDelete(record.id)}>
-                <IconButton
+                <Button
                   style={{ marginLeft: '5px' }}
-                  appearance="ghost"
-                  color="red"
-                  size="sm"
-                  icon={<Icon icon="trash2" />}
+                  type="danger"
+                  size="small"
+                  icon="delete"
+                  ghost
                 />
               </ConfirmDelete>
             )}
           </div>
         );
       },
-      uiProps: {
-        minWidth: 80,
-        flexGrow: 1,
-        verticalAlign: 'middle',
-        align: 'right',
-        fixed: columns.length >= 5 ? 'right' : undefined,
-      },
+      fixed: columns.length > 6,
+      align: 'right',
+      width: 110,
     },
   ];
 }
 
-ListController.defaultProps = {
-  listProps: defaultListProps,
-};
+ListController.defaultProps = {};
 
 const ConfirmDelete = ({ onConfirm, children }) => {
   return (

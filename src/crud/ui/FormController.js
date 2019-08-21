@@ -3,17 +3,31 @@ import { withGlobal } from 'reactn';
 import { Link, withRouter } from 'react-router-dom';
 import { APP_KEY } from './../constants';
 import { resolveRedirect } from './utils';
-import {
-  ButtonToolbar,
-  Header,
-  Content,
-  Button,
-  Form,
-  FormGroup,
-  ControlLabel,
-  HelpBlock,
-  Alert,
-} from 'rsuite';
+import { Form, Tooltip, Button, Icon, message } from 'antd';
+
+const ButtonGroup = Button.Group;
+const formItemLayout = {
+  labelCol: {
+    xs: { span: 24 },
+    sm: { span: 8 },
+  },
+  wrapperCol: {
+    xs: { span: 24 },
+    sm: { span: 16 },
+  },
+};
+const tailFormItemLayout = {
+  wrapperCol: {
+    xs: {
+      span: 24,
+      offset: 0,
+    },
+    sm: {
+      span: 16,
+      offset: 8,
+    },
+  },
+};
 
 function FormController({
   data,
@@ -54,17 +68,17 @@ function FormController({
 
   const submitSideEffect = type => ({ success, record, error }) => {
     if (type === 'create' && success) {
-      Alert.success('Created successfully');
+      message.success('Created successfully');
       const url = resolveRedirect(redirectTo, basePath, record.id, record);
       history.push(url);
     }
     if (type === 'edit' && success) {
-      Alert.success('Updated successfully');
+      message.success('Updated successfully');
       const url = resolveRedirect(redirectTo, basePath, record.id, record);
       history.push(url);
     }
     if (!success) {
-      Alert.error(error);
+      message.error(error);
     }
   };
 
@@ -77,24 +91,32 @@ function FormController({
         crudHandler.create(form, submitSideEffect('create'));
       }
     } catch (e) {
-      Alert.error(e.toString());
+      message.error(e.toString());
     }
   };
 
   return (
     <Fragment>
-      <Header>
-        <h2>
-          {isEdit ? 'Edit' : 'New'}
-          &nbsp; {resource}
-        </h2>
-      </Header>
-      <Content>
-        <Form onSubmit={handleSubmit} layout="horizontal">
-          <div>
-            {React.Children.map(children, child => (
-              <FormGroup>
-                <ControlLabel>{child.props.label}</ControlLabel>
+      <h2 className="MainLayout-header">
+        {isEdit ? 'Edit' : 'New'}
+        &nbsp; {resource}
+      </h2>
+      <section className="MainLayout-content">
+        <Form onSubmit={handleSubmit} layout="horizontal" {...formItemLayout}>
+          {React.Children.map(children, child => {
+            let label = child.props.label;
+            if (child.props.helptext) {
+              label = (
+                <span>
+                  {child.props.label} &nbsp;
+                  <Tooltip title={child.props.helptext}>
+                    <Icon type="question-circle" />
+                  </Tooltip>
+                </span>
+              );
+            }
+            return (
+              <Form.Item label={label}>
                 <child.type
                   {...child.props}
                   onChange={e => handleChange(e, child.props.source)}
@@ -105,24 +127,23 @@ function FormController({
                     ...child.props.style,
                   }}
                 />
-                {child.props.helptext && (
-                  <HelpBlock tooltip>{child.props.helptext}</HelpBlock>
-                )}
-              </FormGroup>
-            ))}
-            <FormGroup>
-              <ButtonToolbar>
-                <Link to={resolveRedirect('list', basePath)}>
-                  <Button appearance="ghost">Cancel</Button>
-                </Link>
-                <Button type="submit" appearance="primary">
-                  Save{' '}
+              </Form.Item>
+            );
+          })}
+          <Form.Item {...tailFormItemLayout}>
+            <ButtonGroup>
+              <Link to={resolveRedirect('list', basePath)}>
+                <Button ghost type="primary">
+                  Cancel
                 </Button>
-              </ButtonToolbar>
-            </FormGroup>
-          </div>
+              </Link>
+              <Button type="primary" htmlType="submit">
+                Save
+              </Button>
+            </ButtonGroup>
+          </Form.Item>
         </Form>
-      </Content>
+      </section>
     </Fragment>
   );
 }

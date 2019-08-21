@@ -1,5 +1,5 @@
 import React, { useState, memo } from 'react';
-import { Button, Row } from 'rsuite';
+import { Col, Button } from 'antd';
 
 /**
  * Styles
@@ -14,6 +14,7 @@ const getContainerStyle = open => ({
   background: '#939eab1a',
   justifyContent: 'space-between',
   position: 'relative',
+  marginBottom: '10px',
 });
 const filterInputStyle = { margin: '8px', display: 'inline-block' };
 const getFilterButtonStyle = open => ({
@@ -28,7 +29,6 @@ function Filters({ open, resource, fields, crudHandler }) {
   const handleFilters = (rawValue, name) => {
     let value = null;
     if (rawValue) {
-      console.log(rawValue);
       value = rawValue.target ? rawValue.target.value : rawValue;
     }
     setFilters({
@@ -43,7 +43,7 @@ function Filters({ open, resource, fields, crudHandler }) {
   if (!fields) return null;
 
   return (
-    <Row style={getContainerStyle(open)}>
+    <Col style={getContainerStyle(open)} span={24}>
       <div style={{ flexGrow: 1 }}>
         {React.Children.map(fields, (field, idx) => {
           const newProps = {
@@ -59,13 +59,13 @@ function Filters({ open, resource, fields, crudHandler }) {
         })}
       </div>
       <Button
-        appearance="primary"
+        type="primary"
         style={getFilterButtonStyle(open)}
         onClick={onSendFilters}
       >
         Apply filters
       </Button>
-    </Row>
+    </Col>
   );
 }
 

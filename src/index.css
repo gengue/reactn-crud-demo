@@ -8,29 +8,32 @@ code {
 }
 
 .MainLayout {
-  background: #f7f7fa;
+  margin-left: 200px;
 }
-.MainLayout .rs-header {
-  padding: 20px 20px 0 20px;
+.MainLayout-page {
+  margin: 24px 16px 0;
+  overflow: initial;
 }
-.MainLayout .rs-content {
+.MainLayout-header {
+  margin-bottom: 20px;
+}
+.MainLayout-content {
   padding: 20px;
-  margin: 20px;
   background: #fff;
 }
 
-.Sidebar {
-  position: fixed;
-  height: 100vh;
-  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.12), 0 0 10px rgba(0, 0, 0, 0.06);
-  display: flex;
-  flex-direction: column;
-  background: #fff;
-}
-.Sidebar > .Nav {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  flex-direction: column;
-  height: 100%;
-}
+/*.Sidebar {*/
+/*position: fixed;*/
+/*height: 100vh;*/
+/*box-shadow: 0 4px 4px rgba(0, 0, 0, 0.12), 0 0 10px rgba(0, 0, 0, 0.06);*/
+/*display: flex;*/
+/*flex-direction: column;*/
+/*background: #fff;*/
+/*}*/
+/*.Sidebar > .Nav {*/
+/*display: flex;*/
+/*flex-wrap: wrap;*/
+/*justify-content: space-between;*/
+/*flex-direction: column;*/
+/*height: 100%;*/
+/*}*/

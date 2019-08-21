@@ -5,7 +5,7 @@ import { ShowController } from './../../crud/ui';
 function UserShow(props) {
   const fields = [
     {
-      property: 'avatar',
+      dataIndex: 'avatar',
       render: record => {
         return (
           <Link to={`/users/${record.id}/show`}>
@@ -19,21 +19,21 @@ function UserShow(props) {
       },
     },
     {
-      property: 'email',
-      label: 'Email',
+      dataIndex: 'email',
+      title: 'Email',
     },
     {
-      property: 'name',
-      label: 'Full name',
+      dataIndex: 'name',
+      title: 'Full name',
       render: record => `${record.first_name} ${record.last_name}`,
     },
     {
-      property: 'country',
-      label: 'Country',
+      dataIndex: 'country',
+      title: 'Country',
     },
     {
-      property: 'created_at',
-      label: 'Joined',
+      dataIndex: 'created_at',
+      title: 'Joined',
     },
   ];
   return <ShowController {...props} fields={fields} resource="users" />;

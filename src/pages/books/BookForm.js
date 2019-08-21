@@ -1,12 +1,12 @@
 import React from 'react';
-import { TextInput } from 'grommet/components';
+import { Input } from 'antd';
 import { FormController } from './../../crud/ui';
 
 function BookForm(props) {
   return (
     <FormController {...props} resource="books">
-      <TextInput name="title" placeholder="Title" required />
-      <TextInput name="cover" placeholder="Cover image URL" />
+      <Input source="title" Label="Title" required />
+      <Input source="cover" Label="Cover image URL" />
     </FormController>
   );
 }

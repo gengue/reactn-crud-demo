@@ -6,7 +6,6 @@ import * as serviceWorker from './serviceWorker';
 import dataProvider from './ideas/dataProvider';
 import { settings as crudSettings } from './crud';
 import './index.css';
-import 'rsuite/dist/styles/rsuite.min.css';
 import 'antd/dist/antd.css';
 
 // set data provider

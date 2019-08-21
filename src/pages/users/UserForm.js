@@ -1,5 +1,5 @@
 import React from 'react';
-import { Input } from 'rsuite';
+import { Input } from 'antd';
 import { FormController } from './../../crud/ui';
 import SelectPickerFetch from './../../components/SelectPickerFetch';
 
@@ -22,7 +22,6 @@ function UserForm(props) {
         resource="countries"
         labelKey="name"
         valueKey="name"
-        fetchOnMount
       />
     </FormController>
   );

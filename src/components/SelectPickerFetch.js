@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useDebounce } from 'use-debounce';
 import queryString from 'query-string';
-import { Icon, SelectPicker, Alert } from 'rsuite';
+import { AutoComplete, Input, Icon, message } from 'antd';
 
 const defaultParams = { limit: 10, page: 1 };
 
@@ -10,7 +10,8 @@ function SelectPickerFetch({
   source,
   params = defaultParams,
   apiUrl = 'https://5d543b8b36ad770014ccd65a.mockapi.io/api/',
-  fetchOnMount,
+  labelKey,
+  valueKey,
   ...other
 }) {
   const [data, setData] = useState([]);
@@ -34,7 +35,7 @@ function SelectPickerFetch({
       setData(json.data);
       setLoadedOnce(true);
     } catch (e) {
-      Alert.error(e);
+      message.error(e);
     } finally {
       setLoading(false);
     }
@@ -43,7 +44,7 @@ function SelectPickerFetch({
   //init
   useEffect(
     () => {
-      if (fetchOnMount) {
+      if (data.length === 0) {
         loadData();
       }
     },
@@ -62,30 +63,27 @@ function SelectPickerFetch({
     [searchText]
   );
 
-  const onOpen = () => {
-    if (data.length === 0) {
-      loadData();
-    }
-  };
   const onSearch = value => setSearch(value);
 
-  const renderMenu = menu => {
-    if (loading || (!loadedOnce && data.length === 0)) {
-      return (
-        <p style={{ padding: 4, color: '#999', textAlign: 'center' }}>
-          <Icon icon="spinner" spin /> loading...
-        </p>
-      );
-    }
-    return menu;
-  };
+  const dataset = useMemo(
+    () => {
+      return data.map(i => ({
+        value: i[valueKey],
+        text: i[labelKey],
+        ...i,
+      }));
+    },
+    [data, valueKey, labelKey]
+  );
 
   return (
-    <SelectPicker
-      data={data}
-      renderMenu={renderMenu}
-      onOpen={onOpen}
+    <AutoComplete
+      allowClear
       onSearch={onSearch}
+      loading={loading || (!loadedOnce && data.length === 0)}
+      style={{ width: 200 }}
+      dataSource={dataset}
+      defaultActiveFirstOption={false}
       {...other}
     />
   );

@@ -19,7 +19,7 @@ function fetchList(dispatchers, resource) {
       limit: params.perPage || 10,
       search: params.search,
       sortBy: params.sort || undefined,
-      order: params.order,
+      order: params.order.toLowerCase(),
       ...params.filter,
     });
     const url = `https://5d543b8b36ad770014ccd65a.mockapi.io/api/${resource}?${query}`;
