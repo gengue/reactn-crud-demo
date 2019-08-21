@@ -37,7 +37,7 @@ function ShowController({ data, loading, fields, match, crudHandler }) {
                 </Button>
               </Link>
               <Link to={resolveRedirect('edit', basePath, record.id)}>
-                <Button type="primary" icon="pencil">
+                <Button type="primary" icon="edit">
                   Edit
                 </Button>
               </Link>

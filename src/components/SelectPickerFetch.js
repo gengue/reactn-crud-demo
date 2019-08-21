@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDebounce } from 'use-debounce';
 import queryString from 'query-string';
-import { AutoComplete, Input, Icon, message } from 'antd';
+import { AutoComplete, message } from 'antd';
 
 const defaultParams = { limit: 10, page: 1 };
 

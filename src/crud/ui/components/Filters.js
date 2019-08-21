@@ -17,15 +17,9 @@ const getContainerStyle = open => ({
   marginBottom: '10px',
 });
 const filterInputStyle = { margin: '8px', display: 'inline-block' };
-const getFilterButtonStyle = open => ({
-  minWidth: '100px',
-  height: '40px',
-  alignSelf: 'flex-end',
-  display: open ? 'inherit' : 'none',
-});
 
-function Filters({ open, resource, fields, crudHandler }) {
-  const [filters, setFilters] = useState({});
+function Filters({ open, resource, fields, crudHandler, activeFilters }) {
+  const [filters, setFilters] = useState(activeFilters);
   const handleFilters = (rawValue, name) => {
     let value = null;
     if (rawValue) {
@@ -39,6 +33,10 @@ function Filters({ open, resource, fields, crudHandler }) {
   const onSendFilters = () => {
     crudHandler.filter({ filter: filters }, { resource });
   };
+  const onClear = () => {
+    crudHandler.filter({ filter: {} }, { resource });
+    setFilters({});
+  };
 
   if (!fields) return null;
 
@@ -49,6 +47,7 @@ function Filters({ open, resource, fields, crudHandler }) {
           const newProps = {
             ...field.props,
             id: field.props.id || field.props.source,
+            value: filters[field.props.source],
             onChange: e => handleFilters(e, field.props.source),
           };
           return (
@@ -57,14 +56,15 @@ function Filters({ open, resource, fields, crudHandler }) {
             </div>
           );
         })}
+        <Button.Group>
+          <Button type="primary" onClick={onSendFilters} size="small">
+            Apply filters
+          </Button>
+          <Button type="primary" ghost onClick={onClear} size="small">
+            Clear
+          </Button>
+        </Button.Group>
       </div>
-      <Button
-        type="primary"
-        style={getFilterButtonStyle(open)}
-        onClick={onSendFilters}
-      >
-        Apply filters
-      </Button>
     </Col>
   );
 }

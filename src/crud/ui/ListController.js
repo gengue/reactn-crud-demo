@@ -206,6 +206,7 @@ const ListController = function(props) {
               resource={resource}
               fields={filters}
               crudHandler={crudHandler}
+              activeFilters={data.list.params.filter}
             />
           )}
           <Col span={24}>
