@@ -1,4 +1,5 @@
 import { UPDATE, APP_KEY } from './../../constants';
+import settings from './../../settings';
 
 /**
  * update
@@ -7,27 +8,17 @@ import { UPDATE, APP_KEY } from './../../constants';
  * @returns {Function} - return a promise
  */
 function update(dispatchers, resource) {
-  return (id, formData, sideEffectsCb) => {
+  return (id, data, sideEffectsCb) => {
     const meta = { resource, intent: UPDATE };
     dispatchers.fetchStart({}, meta);
-    // send the request
-    // e.g. /users?page=1&limit=20
-    const url = `https://5d543b8b36ad770014ccd65a.mockapi.io/api/${resource}/${id}`;
-    // TODO: 1. use our custom fetch to attach token
-    // TODO: 2. use our dataProvider to fetch this
-    const promise = fetch(url, {
-      method: 'PUT',
-      body: JSON.stringify(formData),
-      headers: new Headers({
-        'Content-type': 'application/json',
-      }),
-    });
+
+    const dataProvider = settings.get('dataProvider');
+    const promise = dataProvider(UPDATE, resource, { id, data });
 
     promise
-      .then(response => response.json())
       .then(
         async function(response) {
-          const record = { ...response, ...formData };
+          const record = { ...response, ...data };
           const global = await dispatchers.updateSuccess(
             { payload: record },
             meta

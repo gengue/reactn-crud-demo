@@ -1,6 +1,6 @@
 import React from 'react';
-import { ListController } from './../../crud/ui';
 import { Input } from 'antd';
+import { ListController } from './../../crud/ui';
 import SelectPickerFetch from './../../components/SelectPickerFetch';
 
 function UserList(props) {

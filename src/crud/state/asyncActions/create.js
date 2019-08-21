@@ -1,4 +1,5 @@
 import { CREATE } from './../../constants';
+import settings from './../../settings';
 
 /**
  * create
@@ -7,28 +8,18 @@ import { CREATE } from './../../constants';
  * @returns {Function} - return a promise
  */
 function create(dispatchers, resource) {
-  return (formData, sideEffectsCb) => {
+  return (data, sideEffectsCb) => {
     const meta = { resource, intent: CREATE };
     dispatchers.fetchStart({}, meta);
-    // send the request
-    // e.g. /users?page=1&limit=20
-    const url = `https://5d543b8b36ad770014ccd65a.mockapi.io/api/${resource}`;
-    // TODO: 1. use our custom fetch to attach token
-    // TODO: 2. use our dataProvider to fetch this
-    const promise = fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(formData),
-      headers: new Headers({
-        'Content-type': 'application/json',
-      }),
-    });
+
+    const dataProvider = settings.get('dataProvider');
+    const promise = dataProvider(CREATE, resource, { data });
 
     promise
-      .then(response => response.json())
       .then(
         async function(response) {
           // dispatch the success action
-          const record = { ...response, ...formData };
+          const record = { ...response, ...data };
           const global = await dispatchers.createSuccess(
             { payload: record },
             meta

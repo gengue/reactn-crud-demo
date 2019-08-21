@@ -2,14 +2,6 @@ body {
   background: #f7f7fa !important;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
-
-.MainLayout {
-  margin-left: 200px;
-}
 .MainLayout-page {
   margin: 24px 16px 0;
   overflow: initial;
@@ -21,19 +13,3 @@ code {
   padding: 20px;
   background: #fff;
 }
-
-/*.Sidebar {*/
-/*position: fixed;*/
-/*height: 100vh;*/
-/*box-shadow: 0 4px 4px rgba(0, 0, 0, 0.12), 0 0 10px rgba(0, 0, 0, 0.06);*/
-/*display: flex;*/
-/*flex-direction: column;*/
-/*background: #fff;*/
-/*}*/
-/*.Sidebar > .Nav {*/
-/*display: flex;*/
-/*flex-wrap: wrap;*/
-/*justify-content: space-between;*/
-/*flex-direction: column;*/
-/*height: 100%;*/
-/*}*/

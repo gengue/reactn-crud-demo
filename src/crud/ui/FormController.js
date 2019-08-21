@@ -1,6 +1,7 @@
 import React, { Fragment, memo, useState, useEffect } from 'react';
 import { withGlobal } from 'reactn';
 import { Link, withRouter } from 'react-router-dom';
+import settings from './../settings';
 import { APP_KEY } from './../constants';
 import { resolveRedirect } from './utils';
 import { Form, Tooltip, Button, Icon, message } from 'antd';
@@ -163,8 +164,8 @@ export default props => {
       global[APP_KEY].loading,
   });
 
-  const Controller = withGlobal(mapStateToProps)(
-    memo(withRouter(FormController))
-  );
+  const SettedComponent = settings.get('FormController');
+  const Component = SettedComponent ? SettedComponent : FormController;
+  const Controller = withGlobal(mapStateToProps)(memo(withRouter(Component)));
   return <Controller {...props} />;
 };

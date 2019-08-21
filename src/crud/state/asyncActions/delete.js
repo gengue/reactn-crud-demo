@@ -1,4 +1,5 @@
 import { DELETE } from './../../constants';
+import settings from './../../settings';
 
 /**
  * deleteResource
@@ -10,12 +11,9 @@ function deleteResource(dispatchers, resource) {
   return (id, sideEffectsCb) => {
     const meta = { resource, intent: DELETE };
     dispatchers.fetchStart({}, meta);
-    // send the request
-    // e.g. /users?page=1&limit=20
-    const url = `https://5d543b8b36ad770014ccd65a.mockapi.io/api/${resource}/${id}`;
-    // TODO: 1. use our custom fetch to attach token
-    // TODO: 2. use our dataProvider to fetch this
-    const promise = fetch(url, { method: 'DELETE' });
+
+    const dataProvider = settings.get('dataProvider');
+    const promise = dataProvider(DELETE, resource, { id });
 
     promise
       .then(

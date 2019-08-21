@@ -5,8 +5,8 @@ import { FormController } from './../../crud/ui';
 function BookForm(props) {
   return (
     <FormController {...props} resource="books">
-      <Input source="title" Label="Title" required />
-      <Input source="cover" Label="Cover image URL" />
+      <Input source="title" label="Title" required />
+      <Input source="cover" label="Cover image URL" />
     </FormController>
   );
 }

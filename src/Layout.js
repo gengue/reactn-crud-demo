@@ -15,8 +15,8 @@ const logoStyle = {
 };
 
 function MainLayout(props) {
-  const [expand, setExpand] = useState(false);
-  const handleToggle = () => setExpand(!expand);
+  const [collapsed, setCollapsed] = useState(false);
+  const handleToggle = () => setCollapsed(!collapsed);
   return (
     <Layout>
       <Sider
@@ -27,13 +27,13 @@ function MainLayout(props) {
           left: 0,
         }}
         collapsible
-        collapsed={expand}
+        collapsed={collapsed}
         onCollapse={handleToggle}
         theme="light"
       >
         <Link to="/" style={logoStyle}>
           <Icon type="sketch" style={{ marginRight: '5px' }} />
-          Reacn CRUD
+          {collapsed ? '' : 'Reactn CRUD'}
         </Link>
 
         <Menu theme="light" mode="inline" defaultSelectedKeys={['1']}>
@@ -49,13 +49,20 @@ function MainLayout(props) {
               <span className="nav-text">Books</span>
             </Link>
           </Menu.Item>
+          <Menu.Item key="3">
+            <Link to="/countries/">
+              <Icon type="global" />
+              <span className="nav-text">Countries</span>
+            </Link>
+          </Menu.Item>
         </Menu>
       </Sider>
-      <Layout className="MainLayout">
+      <Layout
+        className="MainLayout"
+        style={{ marginLeft: collapsed ? 80 : 200 }}
+      >
         <Content className="MainLayout-page">{props.children}</Content>
-        <Footer style={{ textAlign: 'center' }}>
-          Ventura Digital Labs ©2019
-        </Footer>
+        <Footer style={{ textAlign: 'center' }}>Genesis Guerrero ©2019</Footer>
       </Layout>
     </Layout>
   );

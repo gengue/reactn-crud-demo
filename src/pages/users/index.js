@@ -5,6 +5,7 @@ import { crud } from './../../crud';
 
 const config = {
   basePath: '/',
+  //hasDelete: false,
   components: {
     List: UserList,
     Create: UserForm,

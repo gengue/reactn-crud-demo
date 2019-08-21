@@ -2,6 +2,7 @@ import React, { Fragment, useEffect, useState, useMemo, memo } from 'react';
 import { withGlobal } from 'reactn';
 import { useDebounce } from 'use-debounce';
 import { Link } from 'react-router-dom';
+import settings from './../settings';
 import { APP_KEY } from './../constants';
 import Filters from './components/Filters';
 import { resolveRedirect } from './utils';
@@ -15,6 +16,7 @@ import {
   Popconfirm,
   Checkbox,
   Table,
+  Pagination,
 } from 'antd';
 
 // table props by default
@@ -36,10 +38,11 @@ const ListController = function(props) {
     saving,
     crudHandler,
     listProps,
+    CustomIterator,
   } = props;
+  const { hasCreate } = props.data.props;
   const { basePath } = data.props;
 
-  const [sort, setSort] = useState(null);
   const [rawSearch, setSearch] = useState(null);
   const [searchText] = useDebounce(rawSearch, 350);
   const [showFilters, setShowFilters] = useState(false);
@@ -83,17 +86,6 @@ const ListController = function(props) {
     [data.list.params, crudHandler, resource]
   );
 
-  // on sort column
-  useEffect(
-    () => {
-      if (sort !== null) {
-        const order = sort.sortOrder === 'descend' ? 'DESC' : 'ASC';
-        crudHandler.filter({ sort: sort.sortField, order }, { resource });
-      }
-    },
-    [sort, crudHandler, resource]
-  );
-
   // on search
   useEffect(
     () => {
@@ -125,19 +117,31 @@ const ListController = function(props) {
   const handleColumnDisplay = (e, column) => {
     setDisplayedColumns({ ...displayedColumns, [column]: e.target.checked });
   };
-  const handleToggleFilters = () => {
-    setShowFilters(!showFilters);
-  };
+  const handleToggleFilters = () => setShowFilters(!showFilters);
   const handleSearch = e => setSearch(e.target.value);
   const handleTableChange = (pagger, filters, sorter) => {
+    const { params: currentParams } = data.list;
+    const params = {};
     if (pagger && pagger.current) {
-      crudHandler.filter(
-        { page: pagger.current, perPage: pagger.pageSize },
-        { resource }
-      );
+      if (
+        pagger.current !== pagination.current ||
+        pagger.pageSize !== pagination.pageSize
+      ) {
+        params.page = pagger.current;
+        params.perPage = pagger.pageSize;
+      }
     }
     if (sorter && sorter.field) {
-      setSort({ sortField: sorter.field, sortOrder: sorter.order });
+      if (
+        currentParams.sort !== sorter.field ||
+        currentParams.order !== sorter.order
+      ) {
+        params.sort = sorter.field;
+        params.order = sorter.order === 'descend' ? 'DESC' : 'ASC';
+      }
+    }
+    if (Object.keys(params).length > 0) {
+      crudHandler.filter(params, { resource });
     }
   };
 
@@ -181,23 +185,27 @@ const ListController = function(props) {
                   )}
                 </Button>
               )}
-              <Popover
-                content={fieldList}
-                title="Columns to display"
-                trigger="click"
-              >
-                <Button style={buttonMarginStyle} icon="unordered-list">
-                  Columns
-                </Button>
-              </Popover>
-              <Link
-                to={resolveRedirect('create', basePath)}
-                style={buttonMarginStyle}
-              >
-                <Button type="primary" icon="plus">
-                  New
-                </Button>
-              </Link>
+              {!CustomIterator && (
+                <Popover
+                  content={fieldList}
+                  title="Columns to display"
+                  trigger="click"
+                >
+                  <Button style={buttonMarginStyle} icon="unordered-list">
+                    Columns
+                  </Button>
+                </Popover>
+              )}
+              {hasCreate && (
+                <Link
+                  to={resolveRedirect('create', basePath)}
+                  style={buttonMarginStyle}
+                >
+                  <Button type="primary" icon="plus">
+                    New
+                  </Button>
+                </Link>
+              )}
             </Col>
           </Col>
           {filters && (
@@ -210,15 +218,37 @@ const ListController = function(props) {
             />
           )}
           <Col span={24}>
-            <Table
-              columns={fields}
-              rowKey="id"
-              dataSource={dataset}
-              pagination={pagination}
-              loading={loading || fetching || saving}
-              onChange={handleTableChange}
-              {...listProps}
-            />
+            {CustomIterator ? (
+              <Fragment>
+                <CustomIterator
+                  pagination={pagination}
+                  fields={columns}
+                  dataset={dataset}
+                  loading={loading || fetching}
+                  saving={saving}
+                  crudHandler={crudHandler}
+                />
+                <Pagination
+                  {...pagination}
+                  onChange={(current, pageSize) =>
+                    handleTableChange({ current, pageSize })
+                  }
+                  onShowSizeChange={(current, pageSize) =>
+                    handleTableChange({ current, pageSize })
+                  }
+                />
+              </Fragment>
+            ) : (
+              <Table
+                columns={fields}
+                rowKey="id"
+                dataSource={dataset}
+                pagination={pagination}
+                loading={loading || fetching || saving}
+                onChange={handleTableChange}
+                {...listProps}
+              />
+            )}
           </Col>
         </Row>
       </section>
@@ -227,7 +257,7 @@ const ListController = function(props) {
 };
 
 function getColumns(columns, displayedColumns, config, crudHandler) {
-  const { basePath, hasEdit, hasDelete } = config;
+  const { basePath, hasEdit, hasShow, hasDelete } = config;
 
   function deleteSideEffect({ success, error }) {
     if (success) {
@@ -239,11 +269,12 @@ function getColumns(columns, displayedColumns, config, crudHandler) {
 
   const handleDelete = id => crudHandler.delete(id, deleteSideEffect);
 
-  return [
-    ...columns.filter(f => displayedColumns[f.dataIndex]).map((field, idx) => {
+  const newColumns = columns
+    .filter(f => displayedColumns[f.dataIndex])
+    .map((field, idx) => {
       const customRender = field.render;
       // wrap into a Link
-      if (field.primary && !field.touched) {
+      if (field.primary && !field.touched && hasShow) {
         field.render = (text, record, index) => {
           return (
             <Link
@@ -259,8 +290,10 @@ function getColumns(columns, displayedColumns, config, crudHandler) {
       }
       // return original definition
       return field;
-    }),
-    {
+    });
+
+  if (hasEdit || hasDelete) {
+    newColumns.push({
       title: 'Actions',
       dataIndex: '_table_actions',
       render: (text, record, index) => {
@@ -288,11 +321,15 @@ function getColumns(columns, displayedColumns, config, crudHandler) {
       fixed: columns.length > 6,
       align: 'right',
       width: 110,
-    },
-  ];
+    });
+  }
+
+  return newColumns;
 }
 
-ListController.defaultProps = {};
+ListController.defaultProps = {
+  columns: [],
+};
 
 const ConfirmDelete = ({ onConfirm, children }) => {
   return (
@@ -317,7 +354,9 @@ export default props => {
       global[APP_KEY].loading,
     saving: global[APP_KEY].saving,
   });
+  const SettedComponent = settings.get('ListController');
+  const Component = SettedComponent ? SettedComponent : ListController;
 
-  const Controller = withGlobal(mapStateToProps)(memo(ListController));
+  const Controller = withGlobal(mapStateToProps)(memo(Component));
   return <Controller {...props} />;
 };

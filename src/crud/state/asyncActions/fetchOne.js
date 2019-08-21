@@ -1,4 +1,5 @@
 import { GET_ONE } from './../../constants';
+import settings from './../../settings';
 
 /**
  * fetchOne
@@ -10,15 +11,11 @@ function fetchOne(dispatchers, resource) {
   return id => {
     const meta = { resource, intent: GET_ONE };
     dispatchers.fetchStart({}, meta);
-    // send the request
-    // e.g. /users?page=1&limit=20
-    const url = `https://5d543b8b36ad770014ccd65a.mockapi.io/api/${resource}/${id}`;
-    // TODO: 1. use our custom fetch to attach token
-    // TODO: 2. use our dataProvider to fetch this
-    const promise = fetch(url);
+
+    const dataProvider = settings.get('dataProvider');
+    const promise = dataProvider(GET_ONE, resource, { id });
 
     promise
-      .then(response => response.json())
       .then(
         function(response) {
           const record = response;

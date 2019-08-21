@@ -1,15 +1,17 @@
-//import Auth from 'utils/Auth';
+//import Auth from './Auth';
 import axios from 'axios';
+
+class AuthHelper {
+  getToken() {
+    return null;
+  }
+}
+const Auth = new AuthHelper();
 
 export const fetchJson = (url, options = {}) => {
   const requestHeaders = options.headers || { Accept: 'application/json' };
 
-  //let accessToken = Auth.getToken();
-  // switch user request should beuse the original token
-  //if (url.includes('/switch/')) {
-  //const { token } = Auth.getPrevSession();
-  //if (token) accessToken = token;
-  //}
+  let accessToken = Auth.getToken();
 
   if (
     !requestHeaders['Content-Type'] &&
@@ -18,9 +20,9 @@ export const fetchJson = (url, options = {}) => {
     requestHeaders['Content-Type'] = 'application/json';
   }
 
-  //if (accessToken) {
-  //requestHeaders['Authorization'] = `Bearer ${accessToken}`;
-  //}
+  if (accessToken) {
+    requestHeaders['Authorization'] = `Bearer ${accessToken}`;
+  }
 
   return axios({
     url,
